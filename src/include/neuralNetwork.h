@@ -12,4 +12,6 @@ typedef struct NEURAL_NETWORK_STRUCT
   double *biases;
 } neuralNet_t;
 
+neuralNet_t *neuralNet_init(uint8_t layerNum, uint8_t *layerSizes) /* generate randomly seeded neural net */
+
 #endif
