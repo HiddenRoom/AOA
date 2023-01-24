@@ -5,6 +5,8 @@
 #include "include/matrix.h"
 
 #define LAYER_NUM 3
+#define TEST_VAL1 0.5
+#define TEST_VAL2 0.5
 
 int main(void)
 {
@@ -12,18 +14,18 @@ int main(void)
 
   uint8_t *layerSizes = malloc(sizeof(uint8_t) * LAYER_NUM);
   layerSizes[0] = 2;
-  layerSizes[1] = 4;
+  layerSizes[1] = 2;
   layerSizes[2] = 1;
 
   neuralNet_t *network = neuralNet_init(LAYER_NUM, layerSizes);
 
-  printf("neuralNet_init(%d, {2, 4, 1}) yielded a staring network with the following weights and biases\n", LAYER_NUM);
+  printf("neuralNet_init(%d, {2, 2, 1}) yielded a staring network with the following weights and biases\n", LAYER_NUM);
 
-  for(i = 0; i < network->layerNum; i++)
+  for(i = 0; i < network->layerNum - 1; i++)
   {
-    printf("biases in layer %d:\n", i + 1);
+    printf("biases in layer %d:\n", i + 2);
 
-    for(j = 0; j < network->layerSizes[i]; j++)
+    for(j = 0; j < network->layerSizes[i + 1]; j++)
     {
       printf("%lf ", network->biases[i][j]);
     }
@@ -47,6 +49,20 @@ int main(void)
       printf("\n");
     }
   }
+
+  printf("\n");
+
+  printf("feedForward gives the following output(s) with inputs: %lf, %lf\n", TEST_VAL1, TEST_VAL2);
+  network->neurons[0][0] = TEST_VAL1;
+  network->neurons[0][1] = TEST_VAL1;
+  forwardPass(network);
+
+  for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
+  {
+    printf("%lf ", network->neurons[LAYER_NUM - 1][i]);
+  }
+
+  printf("\n");
 
   return 0;
 }
