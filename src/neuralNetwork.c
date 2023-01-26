@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "include/neuralNetwork.h"
@@ -10,6 +11,7 @@ double activation(double x)
 
 double derivativeActivation(double x)
 {
+  return pow(sinh(x) / cosh(x), 2.0);
 }
 
 neuralNet_t *neuralNet_init(uint8_t layerNum, uint8_t *layerSizes)
@@ -39,6 +41,31 @@ neuralNet_t *neuralNet_init(uint8_t layerNum, uint8_t *layerSizes)
   {
     for(j = 0; j < layerSizes[i + 1]; j++)
       result->biases[i][j] = (double)((double)rand() / (double)RAND_MAX);
+  }
+
+  return result;
+}
+
+neuralNet_t *neuralNet_dup(neuralNet_t *network)
+{
+  uint8_t i, j; 
+
+  neuralNet_t *result = neuralNet_init(network->layerNum, network->layerSizes);
+
+  for(i = 0; i < network->layerNum; i++)
+  {
+    memcpy(result->neurons[i], network->neurons[i], network->layerSizes[i]);
+  }
+
+  for(i = 0; i < network->layerNum - 1; i++)
+  {
+    memcpy(result->biases[i], network->biases[i], network->layerSizes[i + 1]);
+    result->weights[i]->rowNum = network->weights[i]->rowNum;
+    result->weights[i]->colNum = network->weights[i]->colNum;
+    for(j = 0; j < network->weights[i]->rowNum; j++)
+    {
+      memcpy(result->weights[i]->entries[j], network->weights[i]->entries[j], network->weights[i]->colNum);
+    }
   }
 
   return result;

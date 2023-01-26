@@ -17,6 +17,8 @@ typedef struct NEURAL_NETWORK_STRUCT
 
 neuralNet_t *neuralNet_init(uint8_t layerNum, uint8_t *layerSizes); /* generate randomly seeded neural net */
 
+neuralNet_t *neuralNet_dup(neuralNet_t *network);
+
 void forwardPass(neuralNet_t *network); /* network should have the input/first layer neurons loaded with input vals */
 
 #endif
