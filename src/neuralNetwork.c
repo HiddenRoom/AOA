@@ -46,11 +46,9 @@ neuralNet_t *neuralNet_init(uint8_t layerNum, uint8_t *layerSizes)
   return result;
 }
 
-neuralNet_t *neuralNet_dup(neuralNet_t *network)
+void neuralNet_cpy(neuralNet_t *network, neuralNet_t *result)
 {
   uint8_t i, j; 
-
-  neuralNet_t *result = neuralNet_init(network->layerNum, network->layerSizes);
 
   for(i = 0; i < network->layerNum; i++)
   {
