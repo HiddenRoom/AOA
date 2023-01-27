@@ -54,17 +54,17 @@ neuralNet_t *neuralNet_dup(neuralNet_t *network)
 
   for(i = 0; i < network->layerNum; i++)
   {
-    memcpy(result->neurons[i], network->neurons[i], network->layerSizes[i]);
+    memcpy(result->neurons[i], network->neurons[i], sizeof(double) * network->layerSizes[i]);
   }
 
   for(i = 0; i < network->layerNum - 1; i++)
   {
-    memcpy(result->biases[i], network->biases[i], network->layerSizes[i + 1]);
+    memcpy(result->biases[i], network->biases[i], sizeof(double) * network->layerSizes[i + 1]);
     result->weights[i]->rowNum = network->weights[i]->rowNum;
     result->weights[i]->colNum = network->weights[i]->colNum;
     for(j = 0; j < network->weights[i]->rowNum; j++)
     {
-      memcpy(result->weights[i]->entries[j], network->weights[i]->entries[j], network->weights[i]->colNum);
+      memcpy(result->weights[i]->entries[j], network->weights[i]->entries[j], sizeof(double) * network->weights[i]->colNum);
     }
   }
 

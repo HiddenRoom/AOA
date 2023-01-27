@@ -18,7 +18,6 @@ int main(void)
   layerSizes[2] = 1;
 
   neuralNet_t *network = neuralNet_init(LAYER_NUM, layerSizes);
-  neuralNet_t *networkCpy = neuralNet_dup(network);
 
   printf("neuralNet_init(%d, {2, 2, 1}) yielded a staring network with the following weights and biases\n", LAYER_NUM);
 
@@ -53,7 +52,19 @@ int main(void)
 
   printf("\n");
 
-  printf("TESTING neuralNet_dup; output should be identical to above\n");
+  printf("feedForward gives the following output(s) with inputs: %lf, %lf\n", TEST_VAL1, TEST_VAL2);
+  network->neurons[0][0] = TEST_VAL1;
+  network->neurons[0][1] = TEST_VAL1;
+  forwardPass(network);
+
+  for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
+  {
+    printf("%lf ", network->neurons[LAYER_NUM - 1][i]);
+  }
+
+  neuralNet_t *networkCpy = neuralNet_dup(network);
+
+  printf("neuralNet_dup; output should be identical to above network\n");
 
   for(i = 0; i < networkCpy->layerNum - 1; i++)
   {
@@ -85,16 +96,6 @@ int main(void)
   }
 
   printf("\n\n");
-
-  printf("feedForward gives the following output(s) with inputs: %lf, %lf\n", TEST_VAL1, TEST_VAL2);
-  network->neurons[0][0] = TEST_VAL1;
-  network->neurons[0][1] = TEST_VAL1;
-  forwardPass(network);
-
-  for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
-  {
-    printf("%lf ", network->neurons[LAYER_NUM - 1][i]);
-  }
 
   printf("\n");
 
