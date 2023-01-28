@@ -46,7 +46,7 @@ neuralNet_t *neuralNet_init(uint8_t layerNum, uint8_t *layerSizes)
   return result;
 }
 
-void neuralNet_cpy(neuralNet_t *network, neuralNet_t *result)
+void neuralNet_cpy(neuralNet_t *result, neuralNet_t *network)
 {
   uint8_t i, j; 
 
@@ -65,8 +65,6 @@ void neuralNet_cpy(neuralNet_t *network, neuralNet_t *result)
       memcpy(result->weights[i]->entries[j], network->weights[i]->entries[j], sizeof(double) * network->weights[i]->colNum);
     }
   }
-
-  return result;
 }
 
 void forwardPass(neuralNet_t *network) /* network should have the input/first layer neurons loaded with input vals */
@@ -88,3 +86,32 @@ void forwardPass(neuralNet_t *network) /* network should have the input/first la
     }
   }
 } 
+
+void backPropagation(double *input, double *desiredOutput, neuralNet_t *network, neuralNet_t *tmp) /* desired changes for network will be put in tmp */
+{
+  uint8_t i, j, k;
+
+  double totalError;
+
+  /* input input values into first network layer */
+  for(i = 0; i < network->layerSizes[0]; i++)
+  {
+    network->neurons[0][i] = input[i];
+  }
+
+  totalError = cost(network->neurons[network->layerNum - 1], desiredOutput, network->layerNum);
+}
+
+double cost(double *actualOutput, double *desiredOutput, uint8_t size)
+{
+  uint8_t i;
+
+  double cost = 0;
+
+  for(i = 0; i < size; i++)
+  {
+    cost += pow(actualOutput[i] - desiredOutput[i], 2.0);
+  }
+
+  return cost;
+}
