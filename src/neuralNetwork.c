@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "include/neuralNetwork.h"
+#include "include/matrix.h"
 
 double activation(double x)
 {
@@ -91,7 +92,7 @@ void backPropagation(double *input, double *desiredOutput, neuralNet_t *network,
 {
   uint8_t i, j, k;
 
-  double totalError;
+  double *error;
 
   /* input input values into first network layer */
   for(i = 0; i < network->layerSizes[0]; i++)
@@ -99,18 +100,18 @@ void backPropagation(double *input, double *desiredOutput, neuralNet_t *network,
     network->neurons[0][i] = input[i];
   }
 
-  totalError = cost(network->neurons[network->layerNum - 1], desiredOutput, network->layerNum);
+  error = cost(network->neurons[network->layerNum - 1], desiredOutput, network->layerSizes[network->layerNum - 1]);
 }
 
-double cost(double *actualOutput, double *desiredOutput, uint8_t size)
+double *cost(double *actualOutput, double *desiredOutput, uint8_t size)
 {
   uint8_t i;
 
-  double cost = 0;
+  double *cost = malloc(sizeof(double) * size);
 
   for(i = 0; i < size; i++)
   {
-    cost += pow(actualOutput[i] - desiredOutput[i], 2.0);
+    cost[i] += pow(actualOutput[i] - desiredOutput[i], 2.0);
   }
 
   return cost;
