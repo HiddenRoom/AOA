@@ -5,14 +5,16 @@
 #include "include/neuralNetwork.h"
 #include "include/matrix.h"
 
-double activation(double x)
+#define LEARNING_RATE 0.01
+
+double sigmoid(double x)
 {
-  return tanh(x);
+  return 1 / (1 + exp(-x));
 }
 
-double derivativeActivation(double x)
+double dSigmoid(double x)
 {
-  return pow(sinh(x) / cosh(x), 2.0);
+  return x * (1 - x);
 }
 
 neuralNet_t *neuralNet_init(uint8_t layerNum, uint8_t *layerSizes)
@@ -83,16 +85,16 @@ void forwardPass(neuralNet_t *network) /* network should have the input/first la
         network->neurons[i + 1][j] += network->weights[i]->entries[k][j] * network->neurons[i][k];
       }
       
-      network->neurons[i + 1][j] = activation(network->neurons[i + 1][j]);
+      network->neurons[i + 1][j] = sigmoid(network->neurons[i + 1][j]);
     }
   }
 } 
 
-void backPropagation(double *input, double *desiredOutput, neuralNet_t *network, neuralNet_t *tmp) /* desired changes for network will be put in tmp */
+void backPropagation(double *input, double *desired, neuralNet_t *network, neuralNet_t *tmp) /* changes will be placed into tmp desired should be dynamically allocated and caller saved */
 {
   uint8_t i, j, k;
 
-  double *error;
+  double *dError;
 
   /* input input values into first network layer */
   for(i = 0; i < network->layerSizes[0]; i++)
@@ -100,10 +102,22 @@ void backPropagation(double *input, double *desiredOutput, neuralNet_t *network,
     network->neurons[0][i] = input[i];
   }
 
-  error = cost(network->neurons[network->layerNum - 1], desiredOutput, network->layerSizes[network->layerNum - 1]);
+  forwardPass(network);
+
+  dError = dCost(network->neurons[network->layerNum -1], desired, network->layerSizes[network->layerNum - 1]);
+
+  for(i = network->layerNum - 1; i > 0; i--)
+  {
+    for(j = 0; j < network->layerSizes[i]; j++)
+    {
+      for(k = 0; k < network->layerSizes[i - 1]; k++)
+      {
+      }
+    }
+  }
 }
 
-double *cost(double *actualOutput, double *desiredOutput, uint8_t size)
+double *dCost(double *actualOutput, double *desiredOutput, uint8_t size)
 {
   uint8_t i;
 
@@ -111,7 +125,7 @@ double *cost(double *actualOutput, double *desiredOutput, uint8_t size)
 
   for(i = 0; i < size; i++)
   {
-    cost[i] += pow(actualOutput[i] - desiredOutput[i], 2.0);
+    cost[i] += 2.0 * (actualOutput[i] - desiredOutput[i]);
   }
 
   return cost;
