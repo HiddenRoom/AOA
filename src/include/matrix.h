@@ -9,6 +9,6 @@ typedef struct MATRIX_STRUCT
   double **entries;
 } matrix_t;
 
-matrix_t *matrix_init(uint8_t rowNum, uint8_t colNum);
+matrix_t *matrix_init(double coefficient, uint8_t rowNum, uint8_t colNum);
 
 #endif

@@ -2,7 +2,7 @@
 
 #include "include/matrix.h"
 
-matrix_t *matrix_init(uint8_t rowNum, uint8_t colNum)
+matrix_t *matrix_init(double coefficient, uint8_t rowNum, uint8_t colNum)
 {
   uint8_t i, j;
 
@@ -17,7 +17,7 @@ matrix_t *matrix_init(uint8_t rowNum, uint8_t colNum)
     result->entries[i] = malloc(sizeof(double) * colNum);
     for(j = 0; j < colNum; j++)
     {
-      result->entries[i][j] = (double)((double)rand() / (double)RAND_MAX);
+      result->entries[i][j] = coefficient * (double)((double)rand() / (double)RAND_MAX);
     }
   }
 
