@@ -32,7 +32,7 @@ neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint8_t laye
   result->neurons = malloc(sizeof(double *) * (layerNum)); 
   result->weights = malloc(sizeof(matrix_t *) * (layerNum - 1)); /* no weights on the last layer and no biases on first layer */
   result->biases = malloc(sizeof(double *) * (layerNum - 1)); 
-  result->weightsTmp = malloc(sizeof(matrix_t *) * (layerNum - 1)); /* no weights on the last layer and no biases on first layer */
+  result->weightsTmp = malloc(sizeof(matrix_t *) * (layerNum - 1));
   result->biasesTmp = malloc(sizeof(double *) * (layerNum - 1)); 
 
   for(i = 0; i < layerNum - 1; i++) /* -1 for no weights on last layer */
@@ -67,11 +67,11 @@ void forwardPass(neuralNet_t *network) /* network should have the input/first la
 
   for(i = 0; i < network->layerNum - 1; i++)
   {
-    for(j = 0; j < network->weights[i]->colNum; j++)
+    for(j = 0; j < network->layerSizes[i + 1]; j++)
     {
       network->neurons[i + 1][j] = network->biases[i][j];
 
-      for(k = 0; k < network->weights[i]->rowNum; k++)
+      for(k = 0; k < network->layerSizes[i]; k++)
       {
         network->neurons[i + 1][j] += network->weights[i]->entries[k][j] * network->neurons[i][k];
       }
@@ -97,11 +97,19 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
 
   forwardPass(network);
 
+  deltaLastLayer = malloc(sizeof(double) * network->layerSizes[network->layerNum - 1]);
+
   for(i = 0; i < network->layerSizes[network->layerNum - 1]; i++)
   {
     dError = 2.0 * (network->neurons[network->layerNum - 1][i] - desired[i]);
-
     deltaLastLayer[i] = dError * dSigmoid(network->neurons[network->layerNum - 1][i]);
+
+    network->biases[network->layerNum - 2][i] -= deltaLastLayer[i] * network->learningRate;
+
+    for(j = 0; j < network->layerSizes[network->layerNum - 2]; j++)
+    {
+      network->weights[network->layerNum - 2]->entries[j][i] -= network->neurons[network->layerSizes[network->layerNum - 2]][j] * deltaLastLayer[i] * network->learningRate;
+    }
   }
 
   for(i = network->layerNum - 2; i > 0; i--)
@@ -110,26 +118,24 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
 
     for(j = 0; j < network->layerSizes[i]; j++)
     {
+      dError = 0.0;
+      for(k = 0; k < network->layerSizes[i + 1]; k++)
+      {
+        dError += network->weights[i]->entries[k][j] * deltaLastLayer[k];
+      }
+
+      deltaCurrentLayer[j] = dError * dSigmoid(network->neurons[i][j]);
+      network->biases[i][j] -= deltaCurrentLayer[j] * network->learningRate;
+
       for(k = 0; k < network->layerSizes[i - 1]; k++)
       {
+        network->weights[i - 1]->entries[k][j] -= network->neurons[i - 1][k] * deltaCurrentLayer[j] * network->learningRate;
       }
     }
 
     free(deltaLastLayer);
-    deltaCurrentLayer = deltaLastLayer;
-  }
-}
-
-double *dCost(double *actualOutput, double *desiredOutput, uint8_t size)
-{
-  uint8_t i;
-
-  double *cost = malloc(sizeof(double) * size);
-
-  for(i = 0; i < size; i++)
-  {
-    cost[i] += 2.0 * (actualOutput[i] - desiredOutput[i]);
+    deltaLastLayer = deltaCurrentLayer;
   }
 
-  return cost;
+  free(deltaCurrentLayer);
 }
