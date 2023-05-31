@@ -4,7 +4,7 @@
 #include "include/neuralNetwork.h"
 #include "include/matrix.h"
 
-#define LAYER_NUM 3
+#define LAYER_NUM 4
 #define TEST_VAL1 0.5
 #define TEST_VAL2 0.5
 #define LEARNING_RATE 0.1
@@ -12,18 +12,19 @@
 
 int main(void)
 {
-  uint8_t i, j, k;
+  uint16_t i, j, k;
 
-  uint8_t *layerSizes = malloc(sizeof(uint8_t) * LAYER_NUM);
+  uint16_t *layerSizes = malloc(sizeof(uint16_t) * LAYER_NUM);
   layerSizes[0] = 1;
-  layerSizes[1] = 2;
-  layerSizes[2] = 2;
+  layerSizes[1] = 50;
+  layerSizes[2] = 50;
+  layerSizes[3] = 2;
 
   double input = 0.5;
 
   neuralNet_t *network = neuralNet_init(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
 
-  printf("neuralNet_init(%lf, %d, %d, {1, 2, 2}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
+  printf("neuralNet_init(%lf, %d, %d, {1, 8, 8, 2}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
 
   for(i = 0; i < network->layerNum - 1; i++)
   {

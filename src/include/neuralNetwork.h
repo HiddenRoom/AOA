@@ -10,8 +10,8 @@ typedef struct NEURAL_NETWORK_STRUCT
   double learningRate;
   uint16_t epochLen;
 
-  uint8_t layerNum;
-  uint8_t *layerSizes;
+  uint16_t layerNum;
+  uint16_t *layerSizes;
   double **neurons;
 
   matrix_t **weights; 
@@ -21,7 +21,7 @@ typedef struct NEURAL_NETWORK_STRUCT
   double **biasesTmp;
 } neuralNet_t;
 
-neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint8_t layerNum, uint8_t *layerSizes); /* generate randomly seeded neural net */
+neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint16_t layerNum, uint16_t *layerSizes); /* generate randomly seeded neural net */
 
 void neuralNet_cpy(neuralNet_t *result, neuralNet_t *network);
 

@@ -9,19 +9,19 @@
 
 double sigmoid(double x)
 {
-  return 1 / (1 + exp(-x));
+  return fmax(0, x); 
 }
 
 double dSigmoid(double x)
 {
-  return x * (1 - x);
+  return x <= 0 ? 0 : 1; 
 }
 
 
 
-neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint8_t layerNum, uint8_t *layerSizes) /* generate randomly seeded neural net */
+neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint16_t layerNum, uint16_t *layerSizes) /* generate randomly seeded neural net */
 {
-  uint8_t i, j;
+  uint16_t i, j;
 
   neuralNet_t *result = malloc(sizeof(neuralNet_t));
   result->learningRate = learningRate;
@@ -63,7 +63,7 @@ neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint8_t laye
 
 void forwardPass(neuralNet_t *network) /* network should have the input/first layer neurons loaded with input vals */
 {
-  uint8_t i, j, k;
+  uint16_t i, j, k;
 
   for(i = 0; i < network->layerNum - 1; i++)
   {
@@ -83,7 +83,7 @@ void forwardPass(neuralNet_t *network) /* network should have the input/first la
 
 void backPropagation(double *input, double *desired, neuralNet_t *network) /* changes will be placed into tmp weights and biases of network*/
 {
-  uint8_t i, j, k;
+  uint16_t i, j, k;
 
   double dError;
   double *deltaCurrentLayer;
