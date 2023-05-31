@@ -9,22 +9,11 @@
 #define TEST_VAL2 0.5
 #define LEARNING_RATE 0.1
 #define EPOCH_LEN 1
+#define NUM_TRAIN 500
 
-int main(void)
+void printNetwork(neuralNet_t *network)
 {
   uint16_t i, j, k;
-
-  uint16_t *layerSizes = malloc(sizeof(uint16_t) * LAYER_NUM);
-  layerSizes[0] = 1;
-  layerSizes[1] = 50;
-  layerSizes[2] = 50;
-  layerSizes[3] = 2;
-
-  double input = 0.5;
-
-  neuralNet_t *network = neuralNet_init(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
-
-  printf("neuralNet_init(%lf, %d, %d, {1, 8, 8, 2}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
 
   for(i = 0; i < network->layerNum - 1; i++)
   {
@@ -54,6 +43,25 @@ int main(void)
       printf("\n");
     }
   }
+}
+
+int main(void)
+{
+  uint16_t i;
+
+  uint16_t *layerSizes = malloc(sizeof(uint16_t) * LAYER_NUM);
+  layerSizes[0] = 1;
+  layerSizes[1] = 20;
+  layerSizes[2] = 5;
+  layerSizes[3] = 2;
+
+  double input = 0.5;
+
+  neuralNet_t *network = neuralNet_init(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
+
+  printf("neuralNet_init(%lf, %d, %d, {1, 8, 8, 2}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
+
+  printNetwork(network);
 
   printf("\n");
 
@@ -70,12 +78,14 @@ int main(void)
 
   double desirdOutput[] = {0.8, 0.2};
 
-  for(int x = 0; x < 120; x++)
+  for(int x = 0; x < NUM_TRAIN; x++)
   {
     backPropagation(&input, desirdOutput, network);
+
+    //printNetwork(network);
   }
 
-  printf("after 120 backprop rounds with targets %lf %lf feedForward gives the following output(s) with inputs: %lf\n", desirdOutput[0], desirdOutput[1], input);
+  printf("after %d backprop rounds with targets %lf %lf feedForward gives the following output(s) with inputs: %lf\n", NUM_TRAIN, desirdOutput[0], desirdOutput[1], input);
   forwardPass(network);
 
   for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)

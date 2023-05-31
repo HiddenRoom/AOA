@@ -7,17 +7,17 @@
 
 #define LEARNING_RATE 0.01
 
-double sigmoid(double x)
+double activation(double x)
 {
-  return fmax(0, x); 
+  //return fmax(0, x); 
+  return tanh(x);
 }
 
-double dSigmoid(double x)
+double dActivation(double activationOfX)
 {
-  return x <= 0 ? 0 : 1; 
+  //return activationOfX <= 0 ? 0 : 1; 
+  return 1 - activationOfX * activationOfX;
 }
-
-
 
 neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint16_t layerNum, uint16_t *layerSizes) /* generate randomly seeded neural net */
 {
@@ -76,7 +76,7 @@ void forwardPass(neuralNet_t *network) /* network should have the input/first la
         network->neurons[i + 1][j] += network->weights[i]->entries[k][j] * network->neurons[i][k];
       }
       
-      network->neurons[i + 1][j] = sigmoid(network->neurons[i + 1][j]);
+      network->neurons[i + 1][j] = activation(network->neurons[i + 1][j]);
     }
   }
 } 
@@ -102,7 +102,7 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
   for(i = 0; i < network->layerSizes[network->layerNum - 1]; i++)
   {
     dError = 2.0 * (network->neurons[network->layerNum - 1][i] - desired[i]);
-    deltaLastLayer[i] = dError * dSigmoid(network->neurons[network->layerNum - 1][i]);
+    deltaLastLayer[i] = dError * dActivation(network->neurons[network->layerNum - 1][i]);
 
     network->biases[network->layerNum - 2][i] -= deltaLastLayer[i] * network->learningRate;
 
@@ -121,10 +121,10 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
       dError = 0.0;
       for(k = 0; k < network->layerSizes[i + 1]; k++)
       {
-        dError += network->weights[i]->entries[k][j] * deltaLastLayer[k];
+        dError += network->weights[i]->entries[j][k] * deltaLastLayer[k];
       }
 
-      deltaCurrentLayer[j] = dError * dSigmoid(network->neurons[i][j]);
+      deltaCurrentLayer[j] = dError * dActivation(network->neurons[i][j]);
       network->biases[i - 1][j] -= deltaCurrentLayer[j] * network->learningRate;
 
       for(k = 0; k < network->layerSizes[i - 1]; k++)
