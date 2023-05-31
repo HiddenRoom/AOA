@@ -7,7 +7,7 @@
 #define LAYER_NUM 4
 #define TEST_VAL1 0.5
 #define TEST_VAL2 0.5
-#define LEARNING_RATE 0.1
+#define LEARNING_RATE 0.001
 #define EPOCH_LEN 1
 #define NUM_TRAIN 500
 
