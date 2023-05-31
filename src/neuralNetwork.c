@@ -125,7 +125,7 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
       }
 
       deltaCurrentLayer[j] = dError * dSigmoid(network->neurons[i][j]);
-      network->biases[i][j] -= deltaCurrentLayer[j] * network->learningRate;
+      network->biases[i - 1][j] -= deltaCurrentLayer[j] * network->learningRate;
 
       for(k = 0; k < network->layerSizes[i - 1]; k++)
       {
