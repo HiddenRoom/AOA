@@ -108,7 +108,7 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
 
     for(j = 0; j < network->layerSizes[network->layerNum - 2]; j++)
     {
-      network->weights[network->layerNum - 2]->entries[j][i] -= network->neurons[network->layerSizes[network->layerNum - 2]][j] * deltaLastLayer[i] * network->learningRate;
+      network->weights[network->layerNum - 2]->entries[j][i] -= network->neurons[network->layerNum - 2][j] * deltaLastLayer[i] * network->learningRate;
     }
   }
 
