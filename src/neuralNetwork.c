@@ -18,9 +18,9 @@ double dActivation(double activationOfX)
   //return 1 - activationOfX * activationOfX;
 }
 
-neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint16_t layerNum, uint16_t *layerSizes) /* generate randomly seeded neural net */
+neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes) /* generate randomly seeded neural net */
 {
-  uint16_t i, j;
+  uint32_t i, j;
 
   neuralNet_t *result = malloc(sizeof(neuralNet_t));
   result->learningRate = learningRate;
@@ -62,7 +62,7 @@ neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint16_t lay
 
 void forwardPass(neuralNet_t *network) /* network should have the input/first layer neurons loaded with input vals */
 {
-  uint16_t i, j, k;
+  uint32_t i, j, k;
 
   for(i = 0; i < network->layerNum - 1; i++)
   {
@@ -82,7 +82,7 @@ void forwardPass(neuralNet_t *network) /* network should have the input/first la
 
 void backPropagation(double *input, double *desired, neuralNet_t *network) /* changes will be placed into tmp weights and biases of network*/
 {
-  uint16_t i, j, k;
+  uint32_t i, j, k;
 
   double dError;
   double *deltaCurrentLayer;
@@ -139,11 +139,11 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
   free(deltaCurrentLayer);
 }
 
-void train(bool stochastic, uint16_t exampleNum, double **input, double **desired, neuralNet_t *network)
+void train(bool stochastic, uint32_t exampleNum, double **input, double **desired, neuralNet_t *network)
 {
-  uint16_t i, j, k;
+  uint32_t i, j, k;
 
-  uint16_t trainingCycles;
+  uint32_t trainingCycles;
 
   if(stochastic)
   {
@@ -188,12 +188,12 @@ void train(bool stochastic, uint16_t exampleNum, double **input, double **desire
   }
 }
 
-void exampleShuffle(uint16_t exampleNum, double **input, double **desired)
+void exampleShuffle(uint32_t exampleNum, double **input, double **desired)
 {
   double *tmpIn, *tmpDesi;
 
-  uint16_t i;
-  uint16_t randIndex;
+  uint32_t i;
+  uint32_t randIndex;
 
   for(i = 0; i < exampleNum; i++)
   {

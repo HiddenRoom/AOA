@@ -5,10 +5,10 @@
 
 typedef struct MATRIX_STRUCT
 {
-  uint16_t rowNum, colNum;
+  uint32_t rowNum, colNum;
   double **entries;
 } matrix_t;
 
-matrix_t *matrix_init(double coefficient, uint16_t rowNum, uint16_t colNum);
+matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum);
 
 #endif

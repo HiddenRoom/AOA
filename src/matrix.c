@@ -2,9 +2,9 @@
 
 #include "include/matrix.h"
 
-matrix_t *matrix_init(double coefficient, uint16_t rowNum, uint16_t colNum)
+matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum)
 {
-  uint16_t i, j;
+  uint32_t i, j;
 
   matrix_t *result = malloc(sizeof(matrix_t));
   result->rowNum = rowNum;

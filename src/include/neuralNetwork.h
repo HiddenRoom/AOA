@@ -9,10 +9,10 @@
 typedef struct NEURAL_NETWORK_STRUCT
 {
   double learningRate;
-  uint16_t epochLen;
+  uint32_t epochLen;
 
-  uint16_t layerNum;
-  uint16_t *layerSizes;
+  uint32_t layerNum;
+  uint32_t *layerSizes;
   double **neurons;
 
   matrix_t **weights; 
@@ -26,7 +26,7 @@ double activation(double x);
 
 double dActivation(double activationOfX);
 
-neuralNet_t *neuralNet_init(double learningRate, uint16_t epochLen, uint16_t layerNum, uint16_t *layerSizes); /* generate randomly seeded neural net */
+neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes); /* generate randomly seeded neural net */
 
 void neuralNet_cpy(neuralNet_t *result, neuralNet_t *network);
 
@@ -34,8 +34,8 @@ void forwardPass(neuralNet_t *network); /* network should have the input/first l
 
 void backPropagation(double *input, double *desired, neuralNet_t *network); /* desired changes for network will be put in tmp weights and biases */
 
-void train(bool stochastic, uint16_t exampleNum, double **input, double **desired, neuralNet_t *network);
+void train(bool stochastic, uint32_t exampleNum, double **input, double **desired, neuralNet_t *network);
 
-void exampleShuffle(uint16_t exampleNum, double **input, double **output);
+void exampleShuffle(uint32_t exampleNum, double **input, double **output);
 
 #endif
