@@ -182,7 +182,8 @@ void train(bool stochastic, uint32_t exampleNum, double **input, double **desire
     {
       for(k = 0; k < network->layerSizes[i + 1]; k++)
       {
-        network->weights[i]->entries[j][k] -= network->weights[i]->entries[j][k] / trainingCycles;
+        network->weights[i]->entries[j][k] -= network->weightsTmp[i]->entries[j][k] / trainingCycles;
+        network->weightsTmp[i]->entries[j][k] = 0.0;
       }
     }
   }
