@@ -8,14 +8,14 @@
 
 double activation(double x)
 {
-  return fmax(0, x); 
-  //return tanh(x);
+  //return fmax(0, x); 
+  return tanh(x);
 }
 
 double dActivation(double activationOfX)
 {
-  return activationOfX <= 0 ? 0 : 1; 
-  //return 1 - activationOfX * activationOfX;
+  //return activationOfX <= 0 ? 0 : 1; 
+  return 1 - activationOfX * activationOfX;
 }
 
 neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes) /* generate randomly seeded neural net */
@@ -103,11 +103,11 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
     dError = 2.0 * (network->neurons[network->layerNum - 1][i] - desired[i]);
     deltaLastLayer[i] = dError * dActivation(network->neurons[network->layerNum - 1][i]);
 
-    network->biasesTmp[network->layerNum - 2][i] = deltaLastLayer[i] * network->learningRate;
+    network->biasesTmp[network->layerNum - 2][i] += deltaLastLayer[i] * network->learningRate;
 
     for(j = 0; j < network->layerSizes[network->layerNum - 2]; j++)
     {
-      network->weightsTmp[network->layerNum - 2]->entries[j][i] = network->neurons[network->layerNum - 2][j] * deltaLastLayer[i] * network->learningRate;
+      network->weightsTmp[network->layerNum - 2]->entries[j][i] += network->neurons[network->layerNum - 2][j] * deltaLastLayer[i] * network->learningRate;
     }
   }
 
@@ -124,11 +124,11 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
       }
 
       deltaCurrentLayer[j] = dError * dActivation(network->neurons[i][j]);
-      network->biasesTmp[i - 1][j] = deltaCurrentLayer[j] * network->learningRate;
+      network->biasesTmp[i - 1][j] += deltaCurrentLayer[j] * network->learningRate;
 
       for(k = 0; k < network->layerSizes[i - 1]; k++)
       {
-        network->weightsTmp[i - 1]->entries[k][j] = network->neurons[i - 1][k] * deltaCurrentLayer[j] * network->learningRate;
+        network->weightsTmp[i - 1]->entries[k][j] += network->neurons[i - 1][k] * deltaCurrentLayer[j] * network->learningRate;
       }
     }
 
