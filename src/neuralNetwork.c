@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "include/neuralNetwork.h"
 #include "include/matrix.h"
@@ -102,11 +103,11 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
     dError = 2.0 * (network->neurons[network->layerNum - 1][i] - desired[i]);
     deltaLastLayer[i] = dError * dActivation(network->neurons[network->layerNum - 1][i]);
 
-    network->biases[network->layerNum - 2][i] -= deltaLastLayer[i] * network->learningRate;
+    network->biasesTmp[network->layerNum - 2][i] = deltaLastLayer[i] * network->learningRate;
 
     for(j = 0; j < network->layerSizes[network->layerNum - 2]; j++)
     {
-      network->weights[network->layerNum - 2]->entries[j][i] -= network->neurons[network->layerNum - 2][j] * deltaLastLayer[i] * network->learningRate;
+      network->weightsTmp[network->layerNum - 2]->entries[j][i] = network->neurons[network->layerNum - 2][j] * deltaLastLayer[i] * network->learningRate;
     }
   }
 
@@ -123,11 +124,11 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
       }
 
       deltaCurrentLayer[j] = dError * dActivation(network->neurons[i][j]);
-      network->biases[i - 1][j] -= deltaCurrentLayer[j] * network->learningRate;
+      network->biasesTmp[i - 1][j] = deltaCurrentLayer[j] * network->learningRate;
 
       for(k = 0; k < network->layerSizes[i - 1]; k++)
       {
-        network->weights[i - 1]->entries[k][j] -= network->neurons[i - 1][k] * deltaCurrentLayer[j] * network->learningRate;
+        network->weightsTmp[i - 1]->entries[k][j] = network->neurons[i - 1][k] * deltaCurrentLayer[j] * network->learningRate;
       }
     }
 
@@ -136,4 +137,74 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
   }
 
   free(deltaCurrentLayer);
+}
+
+void train(bool stochastic, uint16_t exampleNum, double **input, double **desired, neuralNet_t *network)
+{
+  uint16_t i, j, k;
+
+  uint16_t trainingCycles;
+
+  if(stochastic)
+  {
+    exampleShuffle(exampleNum, input, desired);
+
+    for(i = 0; i < network->epochLen && i < exampleNum; i++)
+    {
+      backPropagation(input[i], desired[i], network);
+    }
+
+    /* i is 1 more than the final index at loop exit making up for indices being 1 less than the number of training cycles */
+    trainingCycles = i;
+  }
+  else
+  {
+    for(i = 0; i < exampleNum; i++)
+    {
+      backPropagation(input[i], desired[i], network);
+    }
+
+    trainingCycles = i;
+  }
+
+  for(i = 0; i < network->layerNum - 1; i++)
+  {
+    for(j = 0; j < network->layerSizes[i + 1]; j++)
+    {
+      network->biases[i][j] -= network->biasesTmp[i][j] / trainingCycles;
+      network->biasesTmp[i][j] = 0.0;
+    }
+  }
+
+  for(i = 0; i < network->layerNum - 1; i++)
+  {
+    for(j = 0; j < network->layerSizes[i]; j++)
+    {
+      for(k = 0; k < network->layerSizes[i + 1]; k++)
+      {
+        network->weights[i]->entries[j][k] -= network->weights[i]->entries[j][k] / trainingCycles;
+      }
+    }
+  }
+}
+
+void exampleShuffle(uint16_t exampleNum, double **input, double **desired)
+{
+  double *tmpIn, *tmpDesi;
+
+  uint16_t i;
+  uint16_t randIndex;
+
+  for(i = 0; i < exampleNum; i++)
+  {
+    randIndex = rand() % exampleNum;
+
+    tmpIn = input[randIndex];
+    tmpDesi = desired[randIndex];
+
+    input[randIndex] = input[i];
+    desired[randIndex] = desired[i];
+    input[i] = tmpIn;
+    desired[i] = tmpDesi;
+  }
 }

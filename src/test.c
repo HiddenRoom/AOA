@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "include/neuralNetwork.h"
 #include "include/matrix.h"
 
-#define LAYER_NUM 4
+#define LAYER_NUM 3
 #define TEST_VAL1 0.5
 #define TEST_VAL2 0.5
-#define LEARNING_RATE 0.001
+#define LEARNING_RATE 0.01
 #define EPOCH_LEN 1
-#define NUM_TRAIN 500
+#define NUM_TRAIN 200
+#define NUM_EXAMPLES 1
 
 void printNetwork(neuralNet_t *network)
 {
@@ -43,6 +45,8 @@ void printNetwork(neuralNet_t *network)
       printf("\n");
     }
   }
+
+  printf("\n");
 }
 
 int main(void)
@@ -51,11 +55,16 @@ int main(void)
 
   uint16_t *layerSizes = malloc(sizeof(uint16_t) * LAYER_NUM);
   layerSizes[0] = 1;
-  layerSizes[1] = 20;
-  layerSizes[2] = 5;
-  layerSizes[3] = 2;
+  layerSizes[1] = 2;
+  layerSizes[2] = 2;
 
-  double input = 0.5;
+  double **trainingInputs = malloc(sizeof(double *) * NUM_EXAMPLES);
+  trainingInputs[0] = malloc(sizeof(double) * layerSizes[0]);
+  trainingInputs[0][0] = 0.5;
+  double **trainingOutputs = malloc(sizeof(double *) * NUM_EXAMPLES);
+  trainingOutputs[0] = malloc(sizeof(double) * layerSizes[LAYER_NUM - 1]);
+  trainingOutputs[0][0] = 0.2;
+  trainingOutputs[0][1] = 0.8;
 
   neuralNet_t *network = neuralNet_init(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
 
@@ -65,8 +74,8 @@ int main(void)
 
   printf("\n");
 
-  printf("feedForward gives the following output(s) with inputs: %lf\n", input);
-  network->neurons[0][0] = input;
+  printf("feedForward gives the following output(s) with inputs: %lf\n", trainingInputs[0][0]);
+  network->neurons[0][0] = trainingInputs[0][0];
   forwardPass(network);
 
   for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
@@ -76,17 +85,14 @@ int main(void)
 
   printf("\n\n");
 
-  double desirdOutput[] = {0.8, 0.2};
-
   for(int x = 0; x < NUM_TRAIN; x++)
   {
-    backPropagation(&input, desirdOutput, network);
+    train(false, NUM_EXAMPLES, trainingInputs, trainingOutputs, network);
 
-    //printNetwork(network);
+    printNetwork(network);
   }
 
-  printf("after %d backprop rounds with targets %lf %lf feedForward gives the following output(s) with inputs: %lf\n", NUM_TRAIN, desirdOutput[0], desirdOutput[1], input);
-  forwardPass(network);
+  printf("after %d backprop rounds with targets %lf %lf feedForward gives the following output(s) with inputs: %lf\n", NUM_TRAIN, trainingOutputs[0][0], trainingOutputs[0][1], trainingInputs[0][0]);
 
   for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
   {
