@@ -8,14 +8,14 @@
 
 double activation(double x)
 {
-  //return fmax(0, x); 
-  return tanh(x);
+  return fmax(0, x); 
+  //return tanh(x);
 }
 
 double dActivation(double activationOfX)
 {
-  //return activationOfX <= 0 ? 0 : 1; 
-  return 1 - activationOfX * activationOfX;
+  return activationOfX <= 0 ? 0 : 1; 
+  //return 1 - activationOfX * activationOfX;
 }
 
 neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes) /* generate randomly seeded neural net */

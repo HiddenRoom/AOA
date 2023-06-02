@@ -8,11 +8,11 @@
 #include "include/matrix.h"
 
 #define LAYER_NUM 4
-#define LEARNING_RATE 0.1
-#define EPOCH_LEN 20
-#define NUM_TRAIN 2000
-#define NUM_EXAMPLES 1000
-#define FUNC_RANGE 4.0
+#define LEARNING_RATE 0.00001
+#define EPOCH_LEN 70
+#define NUM_TRAIN 12000
+#define NUM_EXAMPLES 80
+#define FUNC_RANGE 5.0
 
 void printNetwork(neuralNet_t *network)
 {
@@ -52,23 +52,24 @@ void printNetwork(neuralNet_t *network)
 
 double randDouble(double max)
 {
-    srand((unsigned) time(0));
-    return (rand() > RAND_MAX / 2 ? -1 : 1) *(max / RAND_MAX) * rand();
+  return (rand() % 2 == 0 ? 1.0 : -1.0) * (max * (double)((double)rand() / (double)RAND_MAX));
 }
 
 double funcToApprox(double x)
 {
-  return sin(x);
+  return x * x;
 }
 
 int main(void)
 {
+  srand(time(NULL));
+
   uint32_t i;
 
   uint32_t *layerSizes = malloc(sizeof(uint32_t) * LAYER_NUM);
   layerSizes[0] = 1;
-  layerSizes[1] = 8;
-  layerSizes[2] = 8;
+  layerSizes[1] = 30;
+  layerSizes[2] = 30;
   layerSizes[3] = 1;
 
   double **trainingInputs = malloc(sizeof(double *) * NUM_EXAMPLES);
@@ -82,6 +83,11 @@ int main(void)
   {
     trainingOutputs[i] = malloc(sizeof(double) * layerSizes[0]);
     trainingOutputs[i][0] = funcToApprox(trainingInputs[i][0]);
+
+    if(i % (NUM_EXAMPLES / 20) == 0)
+    {
+      printf("input %lf\toutput %lf\n", trainingInputs[i][0], trainingOutputs[i][0]);
+    }
   }
 
   neuralNet_t *network = neuralNet_init(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
@@ -114,6 +120,8 @@ int main(void)
 
   printNetwork(network);
 
+  testExample = randDouble(FUNC_RANGE);
+
   printf("feedForward gives the following output(s) with inputs: %lf\n", testExample);
   network->neurons[0][0] = testExample;
   forwardPass(network);
@@ -126,6 +134,24 @@ int main(void)
   printf("\n\n");
 
   printf("it should give: %lf\n", funcToApprox(testExample));
+
+  while(true)
+  {
+    scanf("%lf", &testExample);
+
+    printf("feedForward gives the following output(s) with inputs: %lf\n", testExample);
+    network->neurons[0][0] = testExample;
+    forwardPass(network);
+
+    for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
+    {
+      printf("%lf ", network->neurons[LAYER_NUM - 1][i]);
+    }
+
+    printf("\n\n");
+
+    printf("it should give: %lf\n", funcToApprox(testExample));
+  }
 
   return 0;
 }
