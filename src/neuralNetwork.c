@@ -103,11 +103,11 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
     dError = 2.0 * (network->neurons[network->layerNum - 1][i] - desired[i]);
     deltaLastLayer[i] = dError * dActivation(network->neurons[network->layerNum - 1][i]);
 
-    network->biasesTmp[network->layerNum - 2][i] += deltaLastLayer[i] * network->learningRate;
+    network->biasesTmp[network->layerNum - 2][i] -= deltaLastLayer[i] * network->learningRate;
 
     for(j = 0; j < network->layerSizes[network->layerNum - 2]; j++)
     {
-      network->weightsTmp[network->layerNum - 2]->entries[j][i] += network->neurons[network->layerNum - 2][j] * deltaLastLayer[i] * network->learningRate;
+      network->weightsTmp[network->layerNum - 2]->entries[j][i] -= network->neurons[network->layerNum - 2][j] * deltaLastLayer[i] * network->learningRate;
     }
   }
 
@@ -124,11 +124,11 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
       }
 
       deltaCurrentLayer[j] = dError * dActivation(network->neurons[i][j]);
-      network->biasesTmp[i - 1][j] += deltaCurrentLayer[j] * network->learningRate;
+      network->biasesTmp[i - 1][j] -= deltaCurrentLayer[j] * network->learningRate;
 
       for(k = 0; k < network->layerSizes[i - 1]; k++)
       {
-        network->weightsTmp[i - 1]->entries[k][j] += network->neurons[i - 1][k] * deltaCurrentLayer[j] * network->learningRate;
+        network->weightsTmp[i - 1]->entries[k][j] -= network->neurons[i - 1][k] * deltaCurrentLayer[j] * network->learningRate;
       }
     }
 
@@ -171,7 +171,7 @@ void train(bool stochastic, uint32_t exampleNum, double **input, double **desire
   {
     for(j = 0; j < network->layerSizes[i + 1]; j++)
     {
-      network->biases[i][j] -= network->biasesTmp[i][j] / trainingCycles;
+      network->biases[i][j] += network->biasesTmp[i][j] / trainingCycles;
       network->biasesTmp[i][j] = 0.0;
     }
   }
@@ -182,7 +182,7 @@ void train(bool stochastic, uint32_t exampleNum, double **input, double **desire
     {
       for(k = 0; k < network->layerSizes[i + 1]; k++)
       {
-        network->weights[i]->entries[j][k] -= network->weightsTmp[i]->entries[j][k] / trainingCycles;
+        network->weights[i]->entries[j][k] += network->weightsTmp[i]->entries[j][k] / trainingCycles;
         network->weightsTmp[i]->entries[j][k] = 0.0;
       }
     }
