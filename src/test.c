@@ -8,16 +8,17 @@
 #include "include/matrix.h"
 
 #define LAYER_NUM 4
-#define LEARNING_RATE 0.00001
+#define LEARNING_RATE 0.0003
 #define EPOCH_LEN 70
-#define NUM_TRAIN 12000
-#define NUM_EXAMPLES 80
+#define NUM_TRAIN 14000
+#define NUM_EXAMPLES 60000
 #define FUNC_RANGE 5.0
+#define STOCHASTIC true
 
 void printNetwork(neuralNet_t *network)
 {
   uint32_t i, j, k;
-
+  
   for(i = 0; i < network->layerNum - 1; i++)
   {
     printf("biases in layer %d:\n", i + 2);
@@ -57,7 +58,18 @@ double randDouble(double max)
 
 double funcToApprox(double x)
 {
-  return x * x;
+  if(x >= 1.0 && x <= 1.5)
+  {
+    return 0.0;
+  }
+  else if(x > 1.5 && x <= 2.0)
+  {
+    return 1.0;
+  }
+  else 
+  {
+    return x * x;
+  }
 }
 
 int main(void)
@@ -65,6 +77,11 @@ int main(void)
   srand(time(NULL));
 
   uint32_t i;
+
+  for(i = 0; i < 40; i++)
+  {
+    printf("%lf\n", randn(0, 1));
+  }
 
   uint32_t *layerSizes = malloc(sizeof(uint32_t) * LAYER_NUM);
   layerSizes[0] = 1;
@@ -113,9 +130,13 @@ int main(void)
 
   printf("it should give: %lf\n", funcToApprox(testExample));
 
-  for(int x = 0; x < NUM_TRAIN; x++)
+  for(i = 0; i < NUM_TRAIN; i++)
   {
-    train(false, NUM_EXAMPLES, trainingInputs, trainingOutputs, network);
+    train(STOCHASTIC, NUM_EXAMPLES, trainingInputs, trainingOutputs, network);
+    if(i % 100 == 0)
+    {
+      printf("%d\n", i);
+    }
   }
 
   printNetwork(network);

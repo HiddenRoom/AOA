@@ -11,4 +11,6 @@ typedef struct MATRIX_STRUCT
 
 matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum);
 
+double randn(double mu, double sigma);
+
 #endif

@@ -9,13 +9,11 @@
 double activation(double x)
 {
   return fmax(0, x); 
-  //return tanh(x);
 }
 
 double dActivation(double activationOfX)
 {
   return activationOfX <= 0 ? 0 : 1; 
-  //return 1 - activationOfX * activationOfX;
 }
 
 neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes) /* generate randomly seeded neural net */
@@ -36,7 +34,7 @@ neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t lay
 
   for(i = 0; i < layerNum - 1; i++) /* -1 for no weights on last layer */
   {
-    result->weights[i] = matrix_init(1.0, layerSizes[i], layerSizes[i + 1]);
+    result->weights[i] = matrix_init(sqrt(2.0 / (double)result->layerSizes[i]), layerSizes[i], layerSizes[i + 1]);
     result->weightsTmp[i] = matrix_init(0.0, layerSizes[i], layerSizes[i + 1]);
     result->biases[i] = malloc(sizeof(double) * layerSizes[i + 1]);
     result->biasesTmp[i] = malloc(sizeof(double) * layerSizes[i + 1]);
@@ -52,7 +50,7 @@ neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t lay
   {
     for(j = 0; j < layerSizes[i + 1]; j++)
     {
-      result->biases[i][j] = (double)((double)rand() / (double)RAND_MAX);
+      result->biases[i][j] = 0.0;
       result->biasesTmp[i][j] = 0.0;
     }
   }
