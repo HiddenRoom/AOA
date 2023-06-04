@@ -8,8 +8,8 @@
 #include "include/matrix.h"
 
 #define LAYER_NUM 4
-#define LEARNING_RATE 0.001
-#define EPOCH_LEN 70
+#define LEARNING_RATE 0.0035
+#define EPOCH_LEN 100
 #define NUM_TRAIN 14000
 #define NUM_EXAMPLES 60000
 #define FUNC_RANGE 5.0
