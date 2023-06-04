@@ -1,35 +1,42 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <math.h>
 
 #include "include/matrix.h"
 
+#define ACCURACY 5000
+
 double randn(double mu, double sigma)
 {
-  double U1, U2, W, mult;
-  static double X1, X2;
-  static int call = 0;
+  double s;
+  double x, y;
+  double mult;
+  static double xUni, yUni;
+  static bool xOrY = false;
 
-  if (call == 1)
+  if(xOrY)
   {
-    call = !call;
-    return (mu + sigma * (double) X2);
+    xOrY = !xOrY;
+    return mu + sigma * yUni;
   }
 
   do
   {
-    U1 = -1 + ((double) rand () / RAND_MAX) * 2;
-    U2 = -1 + ((double) rand () / RAND_MAX) * 2;
-    W = pow (U1, 2) + pow (U2, 2);
-  } 
-  while (W >= 1 || W == 0);
+    x = 2.0 * ((double)rand() / (double)RAND_MAX) - 1.0;
+    y = 2.0 * ((double)rand() / (double)RAND_MAX) - 1.0;
 
-  mult = sqrt ((-2 * log (W)) / W);
-  X1 = U1 * mult;
-  X2 = U2 * mult;
+    s = pow(x, 2.0) + pow(y, 2.0);
+  }
+  while(s >= 1.0);
 
-  call = !call;
+  mult = sqrt(-2.0 * log(s) / s);
 
-  return (mu + sigma * (double) X1);
+  xUni = x * mult;
+  yUni = y * mult;
+
+  xOrY = !xOrY;
+
+  return mu + sigma * xUni;
 }
 
 matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum)
