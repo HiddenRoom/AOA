@@ -10,14 +10,15 @@ double randn(double mu, double sigma)
 {
   double s;
   double x, y;
-  double mult;
-  static double xUni, yUni;
+  double coefficient;
+  double xUni;
+  static double yUni;
   static bool xOrY = false;
 
   if(xOrY)
   {
     xOrY = !xOrY;
-    return mu + sigma * yUni;
+    return mu + sigma * (double)yUni;
   }
 
   do
@@ -27,16 +28,16 @@ double randn(double mu, double sigma)
 
     s = pow(x, 2.0) + pow(y, 2.0);
   }
-  while(s >= 1.0);
+  while(s >= 1.0 || s == 0);
 
-  mult = sqrt(-2.0 * log(s) / s);
+  coefficient = sqrt(-2.0 * log(s) / s);
 
-  xUni = x * mult;
-  yUni = y * mult;
+  xUni = x * coefficient;
+  yUni = y * coefficient;
 
   xOrY = !xOrY;
 
-  return mu + sigma * xUni;
+  return mu + sigma * (double)xUni;
 }
 
 matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum)
