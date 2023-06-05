@@ -3,17 +3,74 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 #include "include/neuralNetwork.h"
 #include "include/matrix.h"
 
 #define LAYER_NUM 4
-#define LEARNING_RATE 0.0032
+#define LEARNING_RATE 0.01
 #define EPOCH_LEN 100
-#define NUM_TRAIN 14000
-#define NUM_EXAMPLES 60000
+#define TRAINING_ROUNDS 250
+#define TRAINING_EXAMPLES 60000
+#define TESTING_EXAMPLES 10000
 #define FUNC_RANGE 5.0
 #define STOCHASTIC true
+
+typedef struct IMAGE_STRUCT
+{
+    double label;
+    double imgData[784];
+} img_t;
+
+img_t* parseCSV(const char* fileName, int exampleNum)
+{
+  FILE* file = fopen(fileName, "r");
+  if (file == NULL) 
+  {
+    printf("Error opening file: %s\n", fileName);
+    return NULL;
+  }
+
+  // Skip the first line
+  char header[16384];
+  fgets(header, sizeof(header), file);
+
+  img_t* images = (img_t*)malloc(exampleNum * sizeof(img_t));
+  if (images == NULL)
+  {
+    printf("Memory allocation failed.\n");
+    fclose(file);
+    return NULL;
+  }
+
+  char line[16384];  // Assuming maximum line length of 16,384 characters
+
+  int count = 0;
+  while (fgets(line, sizeof(line), file) != NULL && count < exampleNum) 
+  {
+    char* token = strtok(line, ",");
+    int tokenCount = 0;
+
+    images[count].label = atof(token);
+
+    while (token != NULL && tokenCount < 784) 
+    {
+        token = strtok(NULL, ",");
+        if (token != NULL) 
+        {
+          images[count].imgData[tokenCount] = atof(token) / 255.0;
+        }
+        tokenCount++;
+    }
+
+    count++;
+  }
+
+  fclose(file);
+
+  return images;
+}
 
 void printNetwork(neuralNet_t *network)
 {
@@ -51,123 +108,126 @@ void printNetwork(neuralNet_t *network)
   printf("\n");
 }
 
+/*
 double randDouble(double max)
 {
-  return /* (rand() % 2 == 0 ? 1.0 : -1.0) * */ (max * (double)((double)rand() / (double)RAND_MAX));
+  return (max * (double)((double)rand() / (double)RAND_MAX));
 }
 
 double funcToApprox(double x, double y)
 {
   return fmax(x, y);
 }
+*/
 
-int main(void)
+int main(int argc, char **argv)
 {
   srand(time(NULL));
 
-  uint32_t i;
-
-  for(i = 0; i < 200; i++)
-  {
-    printf("%lf\n", randn(0, 1));
-  }
+  uint32_t i, j;
 
   uint32_t *layerSizes = malloc(sizeof(uint32_t) * LAYER_NUM);
-  layerSizes[0] = 2;
+  layerSizes[0] = 784;
   layerSizes[1] = 30;
   layerSizes[2] = 30;
-  layerSizes[3] = 1;
+  layerSizes[3] = 10;
 
-  double **trainingInputs = malloc(sizeof(double *) * NUM_EXAMPLES);
-  for(i = 0; i < NUM_EXAMPLES; i++)
+  img_t *trainingImgs = parseCSV(argv[1], TRAINING_EXAMPLES);
+  img_t *testingImgs = parseCSV(argv[2], TESTING_EXAMPLES);
+
+  double **trainingInputs = malloc(sizeof(double *) * TRAINING_EXAMPLES);
+  for(i = 0; i < TRAINING_EXAMPLES; i++)
   {
     trainingInputs[i] = malloc(sizeof(double) * layerSizes[0]);
-    trainingInputs[i][0] = randDouble(FUNC_RANGE);
-    trainingInputs[i][1] = randDouble(FUNC_RANGE);
+    for(j = 0; j < layerSizes[0]; j++)
+    {
+      trainingInputs[i][j] = trainingImgs[i].imgData[j];
+    }
   }
-  double **trainingOutputs = malloc(sizeof(double *) * NUM_EXAMPLES);
-  for(i = 0; i < NUM_EXAMPLES; i++)
+  double **trainingOutputs = malloc(sizeof(double *) * TRAINING_EXAMPLES);
+  for(i = 0; i < TRAINING_EXAMPLES; i++)
   {
     trainingOutputs[i] = malloc(sizeof(double) * layerSizes[0]);
-    trainingOutputs[i][0] = funcToApprox(trainingInputs[i][0], trainingInputs[i][1]);
-
-    if(i % (NUM_EXAMPLES / 20) == 0)
+    for(j = 0; j < layerSizes[LAYER_NUM - 1]; j++)
     {
-      printf("input %lf %lf\toutput %lf\n", trainingInputs[i][0], trainingInputs[i][1], trainingOutputs[i][0]);
+      if(j == (uint32_t)round(trainingImgs[i].label))
+      {
+        trainingOutputs[i][j] = 1.0;
+      }
+      else
+      {
+        trainingOutputs[i][j] = 0.0;
+      }
+    }
+  }
+
+  double **testingInputs = malloc(sizeof(double *) * TESTING_EXAMPLES);
+  for(i = 0; i < TESTING_EXAMPLES; i++)
+  {
+    testingInputs[i] = malloc(sizeof(double) * layerSizes[0]);
+    for(j = 0; j < layerSizes[0]; j++)
+    {
+      testingInputs[i][j] = testingImgs[i].imgData[j];
+    }
+  }
+  double **testingOutputs = malloc(sizeof(double *) * TESTING_EXAMPLES);
+  for(i = 0; i < TESTING_EXAMPLES; i++)
+  {
+    testingOutputs[i] = malloc(sizeof(double) * layerSizes[0]);
+    for(j = 0; j < layerSizes[LAYER_NUM - 1]; j++)
+    {
+      if(j == (uint32_t)round(testingImgs[i].label))
+      {
+        testingOutputs[i][j] = 1.0;
+      }
+      else
+      {
+        testingOutputs[i][j] = 0.0;
+      }
     }
   }
 
   neuralNet_t *network = neuralNet_init(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
 
-  printf("neuralNet_init(%lf, %d, %d, {2, 8, 8, 2}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
+  printf("neuralNet_init(%lf, %d, %d, {784, 8, 8, 10}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
 
   printNetwork(network);
 
   printf("\n");
 
-  double testExample = randDouble(FUNC_RANGE);
-  double testExample2 = randDouble(FUNC_RANGE);
-
-  printf("feedForward gives the following output(s) with inputs: %lf %lf\n", testExample, testExample2);
-  network->neurons[0][0] = testExample;
-  network->neurons[0][1] = testExample2;
-  forwardPass(network);
-
-  for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
+  for(i = 0; i < TRAINING_ROUNDS; i++)
   {
-    printf("%lf ", network->neurons[LAYER_NUM - 1][i]);
-  }
-
-  printf("\n\n");
-
-  printf("it should give: %lf\n", funcToApprox(testExample, testExample2));
-
-  for(i = 0; i < NUM_TRAIN; i++)
-  {
-    train(STOCHASTIC, NUM_EXAMPLES, trainingInputs, trainingOutputs, network);
+    train(STOCHASTIC, TRAINING_EXAMPLES, trainingInputs, trainingOutputs, network);
     if(i % 100 == 0)
     {
       printf("%d\n", i);
     }
   }
 
-  printNetwork(network);
+  printf("%d %s training rounds completed\n", TRAINING_ROUNDS, STOCHASTIC ? "stochastic" : "batch");
 
-  testExample = randDouble(FUNC_RANGE);
-  testExample2 = randDouble(FUNC_RANGE);
-
-  printf("feedForward gives the following output(s) with inputs: %lf %lf\n", testExample, testExample2);
-  network->neurons[0][0] = testExample;
-  network->neurons[0][1] = testExample2;
-  forwardPass(network);
-
-  for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
+  for(i = 0; i < TESTING_EXAMPLES; i++)
   {
-    printf("%lf ", network->neurons[LAYER_NUM - 1][i]);
-  }
-
-  printf("\n\n");
-
-  printf("it should give: %lf\n", funcToApprox(testExample, testExample2));
-
-  while(true)
-  {
-    scanf("%lf", &testExample);
-    scanf("%lf", &testExample2);
-
-    printf("feedForward gives the following output(s) with inputs: %lf, %lf\n", testExample, testExample2);
-    network->neurons[0][0] = testExample;
-    network->neurons[0][1] = testExample2;
-    forwardPass(network);
-
-    for(i = 0; i < layerSizes[LAYER_NUM - 1]; i++)
+    for(j = 0; j < network->layerSizes[0]; j++)
     {
-      printf("%lf ", network->neurons[LAYER_NUM - 1][i]);
+      network->neurons[0][j] = testingInputs[i][j];
     }
 
+    forwardPass(network);
+
+    printf("expected ");
+    for(j = 0; j < network->layerSizes[network->layerNum - 1]; j++)
+    {
+      printf("%lf ", testingOutputs[i][j]);
+    }
     printf("\n\n");
 
-    printf("it should give: %lf\n", funcToApprox(testExample, testExample2));
+    printf("actual ");
+    for(j = 0; j < network->layerSizes[network->layerNum - 1]; j++)
+    {
+      printf("%lf ", network->neurons[network->layerNum - 1][j]);
+    }
+    printf("\n------\n");
   }
 
   return 0;
