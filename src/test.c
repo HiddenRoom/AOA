@@ -8,13 +8,10 @@
 #include "include/neuralNetwork.h"
 #include "include/matrix.h"
 
-#define LAYER_NUM 4
+#define LAYER_NUM 5
 #define LEARNING_RATE 0.01
 #define EPOCH_LEN 100
-#define TRAINING_ROUNDS 250
-#define TRAINING_EXAMPLES 60000
-#define TESTING_EXAMPLES 10000
-#define FUNC_RANGE 5.0
+#define TRAINING_ROUNDS 25000
 #define STOCHASTIC true
 
 typedef struct IMAGE_STRUCT
@@ -23,53 +20,57 @@ typedef struct IMAGE_STRUCT
     double imgData[784];
 } img_t;
 
-img_t* parseCSV(const char* fileName, int exampleNum)
+typedef struct IMAGE_SET
 {
+  img_t *imgs;
+  uint32_t imgNum;
+} imgSet_t;
+
+imgSet_t parseCSV(const char* fileName)
+{
+  uint32_t i;
+
   FILE* file = fopen(fileName, "r");
-  if (file == NULL) 
+
+  if(file == NULL)
   {
-    printf("Error opening file: %s\n", fileName);
-    return NULL;
+    printf("%s could not be opened for reading\n", fileName);
+    return;
   }
 
-  // Skip the first line
-  char header[16384];
-  fgets(header, sizeof(header), file);
+  img_t *imgs = malloc(sizeof(img_t));
 
-  img_t* images = (img_t*)malloc(exampleNum * sizeof(img_t));
-  if (images == NULL)
+  uint32_t cnt = 0;
+
+  char *tok;
+
+  char lineBuf[16384];
+
+  while(fgets(lineBuf, 16384, file))
   {
-    printf("Memory allocation failed.\n");
-    fclose(file);
-    return NULL;
-  }
+    tok = strtok(lineBuf, ",");
 
-  char line[16384];  // Assuming maximum line length of 16,384 characters
+    imgs[cnt].label = strtod(tok, NULL);
 
-  int count = 0;
-  while (fgets(line, sizeof(line), file) != NULL && count < exampleNum) 
-  {
-    char* token = strtok(line, ",");
-    int tokenCount = 0;
-
-    images[count].label = atof(token);
-
-    while (token != NULL && tokenCount < 784) 
+    for(i = 0; i < 784; i++)
     {
-        token = strtok(NULL, ",");
-        if (token != NULL) 
-        {
-          images[count].imgData[tokenCount] = atof(token) / 255.0;
-        }
-        tokenCount++;
+      tok = strtok(NULL, ",");
+
+      imgs[cnt].imgData[i] = strtod(tok, NULL) / 255.0;
     }
 
-    count++;
+    cnt++;
+
+    imgs = realloc(imgs, sizeof(img_t) * (cnt + 1));
   }
 
   fclose(file);
 
-  return images;
+  imgSet_t result;
+  result.imgs = imgs;
+  result.imgNum = cnt;
+
+  return result;
 }
 
 void printNetwork(neuralNet_t *network)
@@ -122,6 +123,12 @@ double funcToApprox(double x, double y)
 
 int main(int argc, char **argv)
 {
+  if(argc < 3)
+  {
+    printf("USAGE: %s training.csv testing.csv\n", argv[0]);
+    return 1;
+  }
+
   srand(time(NULL));
 
   uint32_t i, j;
@@ -130,13 +137,17 @@ int main(int argc, char **argv)
   layerSizes[0] = 784;
   layerSizes[1] = 30;
   layerSizes[2] = 30;
-  layerSizes[3] = 10;
+  layerSizes[3] = 30;
+  layerSizes[4] = 10;
 
-  img_t *trainingImgs = parseCSV(argv[1], TRAINING_EXAMPLES);
-  img_t *testingImgs = parseCSV(argv[2], TESTING_EXAMPLES);
+  imgSet_t trainingSet = parseCSV(argv[1]);
+  imgSet_t testingSet = parseCSV(argv[2]);
 
-  double **trainingInputs = malloc(sizeof(double *) * TRAINING_EXAMPLES);
-  for(i = 0; i < TRAINING_EXAMPLES; i++)
+  img_t *trainingImgs = trainingSet.imgs;
+  img_t *testingImgs = testingSet.imgs;
+
+  double **trainingInputs = malloc(sizeof(double *) * trainingSet.imgNum);
+  for(i = 0; i < trainingSet.imgNum; i++)
   {
     trainingInputs[i] = malloc(sizeof(double) * layerSizes[0]);
     for(j = 0; j < layerSizes[0]; j++)
@@ -144,8 +155,8 @@ int main(int argc, char **argv)
       trainingInputs[i][j] = trainingImgs[i].imgData[j];
     }
   }
-  double **trainingOutputs = malloc(sizeof(double *) * TRAINING_EXAMPLES);
-  for(i = 0; i < TRAINING_EXAMPLES; i++)
+  double **trainingOutputs = malloc(sizeof(double *) * trainingSet.imgNum);
+  for(i = 0; i < trainingSet.imgNum; i++)
   {
     trainingOutputs[i] = malloc(sizeof(double) * layerSizes[0]);
     for(j = 0; j < layerSizes[LAYER_NUM - 1]; j++)
@@ -161,8 +172,8 @@ int main(int argc, char **argv)
     }
   }
 
-  double **testingInputs = malloc(sizeof(double *) * TESTING_EXAMPLES);
-  for(i = 0; i < TESTING_EXAMPLES; i++)
+  double **testingInputs = malloc(sizeof(double *) * testingSet.imgNum);
+  for(i = 0; i < testingSet.imgNum; i++)
   {
     testingInputs[i] = malloc(sizeof(double) * layerSizes[0]);
     for(j = 0; j < layerSizes[0]; j++)
@@ -170,8 +181,8 @@ int main(int argc, char **argv)
       testingInputs[i][j] = testingImgs[i].imgData[j];
     }
   }
-  double **testingOutputs = malloc(sizeof(double *) * TESTING_EXAMPLES);
-  for(i = 0; i < TESTING_EXAMPLES; i++)
+  double **testingOutputs = malloc(sizeof(double *) * testingSet.imgNum);
+  for(i = 0; i < testingSet.imgNum; i++)
   {
     testingOutputs[i] = malloc(sizeof(double) * layerSizes[0]);
     for(j = 0; j < layerSizes[LAYER_NUM - 1]; j++)
@@ -197,7 +208,7 @@ int main(int argc, char **argv)
 
   for(i = 0; i < TRAINING_ROUNDS; i++)
   {
-    train(STOCHASTIC, TRAINING_EXAMPLES, trainingInputs, trainingOutputs, network);
+    train(STOCHASTIC, trainingSet.imgNum, trainingInputs, trainingOutputs, network);
     if(i % 100 == 0)
     {
       printf("%d\n", i);
@@ -206,7 +217,7 @@ int main(int argc, char **argv)
 
   printf("%d %s training rounds completed\n", TRAINING_ROUNDS, STOCHASTIC ? "stochastic" : "batch");
 
-  for(i = 0; i < TESTING_EXAMPLES; i++)
+  for(i = 0; i < testingSet.imgNum; i++)
   {
     for(j = 0; j < network->layerSizes[0]; j++)
     {
