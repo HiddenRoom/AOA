@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O0 -g3 -ggdb3 -Wall -Wextra -Wpedantic
+CFLAGS=-O3 -march=native -Wall -Wextra -Wpedantic
 LINKFLAGS=-lm
 
 srcs: src/matrix.c src/neuralNetwork.c src/include/matrix.h src/include/neuralNetwork.h
