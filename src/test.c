@@ -10,14 +10,16 @@
 
 #define LAYER_NUM 5
 #define LEARNING_RATE 0.01
-#define EPOCH_LEN 100
-#define TRAINING_ROUNDS 25000
+#define EPOCH_LEN 15
+#define TRAINING_ROUNDS 200000
 #define STOCHASTIC true
+#define DATA_SIZE 784
+#define LABEL_OFFSET (-1.0)
 
 typedef struct IMAGE_STRUCT
 {
     double label;
-    double imgData[784];
+    double data[DATA_SIZE];
 } img_t;
 
 typedef struct IMAGE_SET
@@ -35,7 +37,6 @@ imgSet_t parseCSV(const char* fileName)
   if(file == NULL)
   {
     printf("%s could not be opened for reading\n", fileName);
-    return;
   }
 
   img_t *imgs = malloc(sizeof(img_t));
@@ -56,7 +57,7 @@ imgSet_t parseCSV(const char* fileName)
     {
       tok = strtok(NULL, ",");
 
-      imgs[cnt].imgData[i] = strtod(tok, NULL) / 255.0;
+      imgs[cnt].data[i] = strtod(tok, NULL) / 255.0;
     }
 
     cnt++;
@@ -109,18 +110,6 @@ void printNetwork(neuralNet_t *network)
   printf("\n");
 }
 
-/*
-double randDouble(double max)
-{
-  return (max * (double)((double)rand() / (double)RAND_MAX));
-}
-
-double funcToApprox(double x, double y)
-{
-  return fmax(x, y);
-}
-*/
-
 int main(int argc, char **argv)
 {
   if(argc < 3)
@@ -138,7 +127,7 @@ int main(int argc, char **argv)
   layerSizes[1] = 30;
   layerSizes[2] = 30;
   layerSizes[3] = 30;
-  layerSizes[4] = 10;
+  layerSizes[4] = 26;
 
   imgSet_t trainingSet = parseCSV(argv[1]);
   imgSet_t testingSet = parseCSV(argv[2]);
@@ -152,7 +141,7 @@ int main(int argc, char **argv)
     trainingInputs[i] = malloc(sizeof(double) * layerSizes[0]);
     for(j = 0; j < layerSizes[0]; j++)
     {
-      trainingInputs[i][j] = trainingImgs[i].imgData[j];
+      trainingInputs[i][j] = trainingImgs[i].data[j];
     }
   }
   double **trainingOutputs = malloc(sizeof(double *) * trainingSet.imgNum);
@@ -161,7 +150,7 @@ int main(int argc, char **argv)
     trainingOutputs[i] = malloc(sizeof(double) * layerSizes[0]);
     for(j = 0; j < layerSizes[LAYER_NUM - 1]; j++)
     {
-      if(j == (uint32_t)round(trainingImgs[i].label))
+      if(j == (uint32_t)round(trainingImgs[i].label + LABEL_OFFSET))
       {
         trainingOutputs[i][j] = 1.0;
       }
@@ -178,7 +167,7 @@ int main(int argc, char **argv)
     testingInputs[i] = malloc(sizeof(double) * layerSizes[0]);
     for(j = 0; j < layerSizes[0]; j++)
     {
-      testingInputs[i][j] = testingImgs[i].imgData[j];
+      testingInputs[i][j] = testingImgs[i].data[j];
     }
   }
   double **testingOutputs = malloc(sizeof(double *) * testingSet.imgNum);
@@ -187,7 +176,7 @@ int main(int argc, char **argv)
     testingOutputs[i] = malloc(sizeof(double) * layerSizes[0]);
     for(j = 0; j < layerSizes[LAYER_NUM - 1]; j++)
     {
-      if(j == (uint32_t)round(testingImgs[i].label))
+      if(j == (uint32_t)round(testingImgs[i].label + LABEL_OFFSET))
       {
         testingOutputs[i][j] = 1.0;
       }

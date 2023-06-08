@@ -145,7 +145,7 @@ void train(bool stochastic, uint32_t exampleNum, double **input, double **desire
 
   if(stochastic)
   {
-    exampleShuffle(exampleNum, input, desired);
+    exampleShuffle(network->epochLen, exampleNum, input, desired);
 
     for(i = 0; i < network->epochLen && i < exampleNum; i++)
     {
@@ -187,14 +187,14 @@ void train(bool stochastic, uint32_t exampleNum, double **input, double **desire
   }
 }
 
-void exampleShuffle(uint32_t exampleNum, double **input, double **desired)
+void exampleShuffle(uint32_t epochLen, uint32_t exampleNum, double **input, double **desired)
 {
   double *tmpIn, *tmpDesi;
 
   uint32_t i;
   uint32_t randIndex;
 
-  for(i = 0; i < exampleNum; i++)
+  for(i = 0; i < epochLen; i++)
   {
     randIndex = rand() % exampleNum;
 

@@ -36,6 +36,6 @@ void backPropagation(double *input, double *desired, neuralNet_t *network); /* d
 
 void train(bool stochastic, uint32_t exampleNum, double **input, double **desired, neuralNet_t *network);
 
-void exampleShuffle(uint32_t exampleNum, double **input, double **output);
+void exampleShuffle(uint32_t epochLen, uint32_t exampleNum, double **input, double **desired);
 
 #endif
