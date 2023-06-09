@@ -62,3 +62,16 @@ matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum)
 
   return result;
 }
+
+void freeMatrix(matrix_t *matrix, uint32_t rowNum)
+{
+  uint32_t i, j;
+
+  for(i = 0; i < rowNum; i++)
+  {
+    free(matrix->entries[i]);
+  }
+  free(matrix->entries);
+
+  free(matrix)
+}

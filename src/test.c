@@ -10,8 +10,8 @@
 
 #define LAYER_NUM 5
 #define LEARNING_RATE 0.01
-#define EPOCH_LEN 15
-#define TRAINING_ROUNDS 200000
+#define EPOCH_LEN 2
+#define TRAINING_ROUNDS 3
 #define STOCHASTIC true
 #define DATA_SIZE 784
 #define LABEL_OFFSET (-1.0)

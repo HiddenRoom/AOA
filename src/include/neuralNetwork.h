@@ -28,7 +28,7 @@ double dActivation(double activationOfX);
 
 neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes); /* generate randomly seeded neural net */
 
-void neuralNet_cpy(neuralNet_t *result, neuralNet_t *network);
+void freeNeuralNet(neuralNet_t *network);
 
 void forwardPass(neuralNet_t *network); /* network should have the input/first layer neurons loaded with input vals */
 
