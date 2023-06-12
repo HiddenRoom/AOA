@@ -58,35 +58,30 @@ neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t lay
   return result;
 }
 
-/* incomplete */
 void freeNeuralNet(neuralNet_t *network)
 {
-  uint32_t i, j;
+  uint32_t i;
 
-  neuralNet_t *network = malloc(sizeof(neuralNet_t));
-  network->learningRate = learningRate;
-  network->epochLen = epochLen; /* number of examples per training cycle */
-
-  network->layerNum = layerNum;
-  network->layerSizes = layerSizes;
-  network->neurons = malloc(sizeof(double *) * (layerNum)); 
-  network->weights = malloc(sizeof(matrix_t *) * (layerNum - 1)); /* no weights on the last layer and no biases on first layer */
-  network->biases = malloc(sizeof(double *) * (layerNum - 1)); 
-  network->weightsTmp = malloc(sizeof(matrix_t *) * (layerNum - 1));
-  network->biasesTmp = malloc(sizeof(double *) * (layerNum - 1)); 
-
-  for(i = 0; i < layerNum - 1; i++) /* -1 for no weights on last layer */
+  for(i = 0; i < network->layerNum; i++)
   {
-    network->weights[i] = matrix_init(sqrt(2.0 / (double)network->layerSizes[i]), layerSizes[i], layerSizes[i + 1]);
-    network->weightsTmp[i] = matrix_init(0.0, layerSizes[i], layerSizes[i + 1]);
-    network->biases[i] = malloc(sizeof(double) * layerSizes[i + 1]);
-    network->biasesTmp[i] = malloc(sizeof(double) * layerSizes[i + 1]);
+    free(network->neurons[i]);
   }
 
-  for(i = 0; i < layerNum; i++)
+  for(i = 0; i < network->layerNum - 1; i++)
   {
-    network->neurons[i] = malloc(sizeof(double) * layerSizes[i]);
+    freeMatrix(network->weights[i], network->layerSizes[i]);
+    freeMatrix(network->weightsTmp[i], network->layerSizes[i]);
+    free(network->biases[i]);
+    free(network->biasesTmp[i]);
   }
+
+  free(network->neurons);
+  free(network->weights);
+  free(network->biases);
+  free(network->weightsTmp);
+  free(network->biasesTmp);
+
+  free(network);
 }
 
 void forwardPass(neuralNet_t *network) /* network should have the input/first layer neurons loaded with input vals */
