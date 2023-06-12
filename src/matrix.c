@@ -73,5 +73,5 @@ void freeMatrix(matrix_t *matrix, uint32_t rowNum)
   }
   free(matrix->entries);
 
-  free(matrix)
+  free(matrix);
 }
