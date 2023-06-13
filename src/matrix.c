@@ -45,8 +45,6 @@ matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum)
   uint32_t i, j;
 
   matrix_t *result = malloc(sizeof(matrix_t));
-  result->rowNum = rowNum;
-  result->colNum = colNum;
   result->entries = malloc(sizeof(double *) * rowNum);
 
   /* randomize weights */

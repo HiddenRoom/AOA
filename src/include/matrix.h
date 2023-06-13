@@ -5,7 +5,6 @@
 
 typedef struct MATRIX_STRUCT
 {
-  uint32_t rowNum, colNum;
   double **entries;
 } matrix_t;
 
