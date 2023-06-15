@@ -63,7 +63,7 @@ matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum)
 
 void freeMatrix(matrix_t *matrix, uint32_t rowNum)
 {
-  uint32_t i, j;
+  uint32_t i;
 
   for(i = 0; i < rowNum; i++)
   {
