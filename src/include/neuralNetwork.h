@@ -26,7 +26,7 @@ double activation(double x);
 
 double dActivation(double activationOfX);
 
-neuralNet_t *neuralNet_init(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes); /* generate randomly seeded neural net */
+neuralNet_t *neuralNetInit(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes); /* generate randomly seeded neural net */
 
 void freeNeuralNet(neuralNet_t *network);
 

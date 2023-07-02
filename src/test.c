@@ -11,7 +11,7 @@
 #define LAYER_NUM 5
 #define LEARNING_RATE 0.01
 #define EPOCH_LEN 2
-#define TRAINING_ROUNDS 3
+#define TRAINING_ROUNDS 5000
 #define STOCHASTIC true
 #define DATA_SIZE 784
 #define LABEL_OFFSET (-1.0)
@@ -187,9 +187,9 @@ int main(int argc, char **argv)
     }
   }
 
-  neuralNet_t *network = neuralNet_init(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
+  neuralNet_t *network = neuralNetInit(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
 
-  printf("neuralNet_init(%lf, %d, %d, {784, 8, 8, 10}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
+  printf("neuralNetInit(%lf, %d, %d, {784, 8, 8, 10}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
 
   printNetwork(network);
 

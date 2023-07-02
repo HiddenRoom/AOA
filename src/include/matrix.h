@@ -8,7 +8,7 @@ typedef struct MATRIX_STRUCT
   double **entries;
 } matrix_t;
 
-matrix_t *matrix_init(double coefficient, uint32_t rowNum, uint32_t colNum);
+matrix_t *matrixInit(double coefficient, uint32_t rowNum, uint32_t colNum);
 
 void freeMatrix(matrix_t *matrix, uint32_t rowNum);
 
