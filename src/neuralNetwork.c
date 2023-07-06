@@ -21,6 +21,7 @@ neuralNet_t *neuralNetInit(double learningRate, uint32_t epochLen, uint32_t laye
   uint32_t i, j;
 
   neuralNet_t *result = malloc(sizeof(neuralNet_t));
+  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating neuralNet_t *result\n");
   result->learningRate = learningRate;
   result->epochLen = epochLen; /* number of examples per training cycle */
 
