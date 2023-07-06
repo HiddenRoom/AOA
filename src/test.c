@@ -10,11 +10,11 @@
 
 #define LAYER_NUM 5
 #define LEARNING_RATE 0.01
-#define EPOCH_LEN 2
-#define TRAINING_ROUNDS 5000
+#define EPOCH_LEN 20
+#define TRAINING_ROUNDS 7500
 #define STOCHASTIC true
 #define DATA_SIZE 784
-#define LABEL_OFFSET (-1.0)
+#define LABEL_OFFSET (0.0)
 
 typedef struct IMAGE_STRUCT
 {
@@ -32,12 +32,9 @@ imgSet_t parseCSV(const char* fileName)
 {
   uint32_t i;
 
-  FILE* file = fopen(fileName, "r");
+  FILE *file = fopen(fileName, "r");
 
-  if(file == NULL)
-  {
-    printf("%s could not be opened for reading\n", fileName);
-  }
+  nullCatchAndDie(file, "fopen returned NULL in parseCSV when assigning FILE *file")
 
   img_t *imgs = malloc(sizeof(img_t));
 
