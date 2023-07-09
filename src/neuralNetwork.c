@@ -21,9 +21,9 @@ neuralNet_t *neuralNetInit(double learningRate, uint32_t epochLen, uint32_t laye
   uint32_t i, j;
 
   neuralNet_t *result = malloc(sizeof(neuralNet_t));
-  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating neuralNet_t *result\n");
   result->learningRate = learningRate;
-  result->epochLen = epochLen; /* number of examples per training cycle */
+  result->epochLen = epochLen;
+  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating neuralNet_t *result\n");
 
   result->layerNum = layerNum;
   result->layerSizes = layerSizes;
@@ -32,6 +32,11 @@ neuralNet_t *neuralNetInit(double learningRate, uint32_t epochLen, uint32_t laye
   result->biases = malloc(sizeof(double *) * (layerNum - 1)); 
   result->weightsTmp = malloc(sizeof(matrix_t *) * (layerNum - 1));
   result->biasesTmp = malloc(sizeof(double *) * (layerNum - 1)); 
+  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating double **result->neurons\n");
+  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating matrix **result->weights\n");
+  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating double **result->biases\n");
+  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating matrix **result->weightsTmp\n");
+  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating double **result->biasesTmp\n");
 
   for(i = 0; i < layerNum - 1; i++) /* -1 for no weights on last layer */
   {

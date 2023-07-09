@@ -55,8 +55,8 @@ matrix_t *matrixInit(double coefficient, uint32_t rowNum, uint32_t colNum)
   uint32_t i, j;
 
   matrix_t *result = malloc(sizeof(matrix_t));
-  nullCatchAndDie(result, "malloc returned NULL in matrixInit when allocating matrix_t *result\n");
   result->entries = malloc(sizeof(double *) * rowNum);
+  nullCatchAndDie(result, "malloc returned NULL in matrixInit when allocating matrix_t *result\n");
   nullCatchAndDie(result->entries, "malloc returned NULL in matrixInit when allocating double **result->entries\n");
 
   /* He init */
