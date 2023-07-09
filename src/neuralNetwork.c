@@ -32,23 +32,28 @@ neuralNet_t *neuralNetInit(double learningRate, uint32_t epochLen, uint32_t laye
   result->biases = malloc(sizeof(double *) * (layerNum - 1)); 
   result->weightsTmp = malloc(sizeof(matrix_t *) * (layerNum - 1));
   result->biasesTmp = malloc(sizeof(double *) * (layerNum - 1)); 
-  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating double **result->neurons\n");
-  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating matrix **result->weights\n");
-  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating double **result->biases\n");
-  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating matrix **result->weightsTmp\n");
-  nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating double **result->biasesTmp\n");
+  nullCatchAndDie(result->neurons, "malloc returned NULL in neuralNetInit when allocating double **result->neurons\n");
+  nullCatchAndDie(result->weights, "malloc returned NULL in neuralNetInit when allocating matrix **result->weights\n");
+  nullCatchAndDie(result->biases, "malloc returned NULL in neuralNetInit when allocating double **result->biases\n");
+  nullCatchAndDie(result->weightsTmp, "malloc returned NULL in neuralNetInit when allocating matrix **result->weightsTmp\n");
+  nullCatchAndDie(result->biasesTmp, "malloc returned NULL in neuralNetInit when allocating double **result->biasesTmp\n");
 
   for(i = 0; i < layerNum - 1; i++) /* -1 for no weights on last layer */
   {
     result->weights[i] = matrixInit(sqrt(2.0 / (double)result->layerSizes[i]), layerSizes[i], layerSizes[i + 1]);
-    result->weightsTmp[i] = matrixInit(0.0, layerSizes[i], layerSizes[i + 1]);
     result->biases[i] = malloc(sizeof(double) * layerSizes[i + 1]);
+    result->weightsTmp[i] = matrixInit(0.0, layerSizes[i], layerSizes[i + 1]);
     result->biasesTmp[i] = malloc(sizeof(double) * layerSizes[i + 1]);
+    nullCatchAndDie(result->weights[i], "malloc returned NULL in neuralNetInit when allocating matrix *result->weights[i]\n");
+    nullCatchAndDie(result->biases[i], "malloc returned NULL in neuralNetInit when allocating double *result->biases[i]\n");
+    nullCatchAndDie(result->weightsTmp[i], "malloc returned NULL in neuralNetInit when allocating matrix *result->weightsTmp[i]\n");
+    nullCatchAndDie(result->biasesTmp[i], "malloc returned NULL in neuralNetInit when allocating double *result->biasesTmp[i]\n");
   }
 
   for(i = 0; i < layerNum; i++)
   {
     result->neurons[i] = malloc(sizeof(double) * layerSizes[i]);
+    nullCatchAndDie(result->neurons[i], "malloc returned NULL in neuralNetInit when allocating double *result->neurons[i]\n");
   }
 
   /* randomize biases */
