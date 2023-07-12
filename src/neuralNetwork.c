@@ -174,33 +174,21 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
   free(deltaCurrentLayer);
 }
 
-void train(bool stochastic, uint32_t exampleNum, double **input, double **desired, neuralNet_t *network)
+void train(uint32_t exampleNum, double **input, double **desired, neuralNet_t *network)
 {
   uint32_t i, j, k;
 
   uint32_t trainingCycles;
 
-  if(stochastic)
+  exampleShuffle(network->epochLen, exampleNum, input, desired);
+
+  for(i = 0; i < network->epochLen && i < exampleNum; i++)
   {
-    exampleShuffle(network->epochLen, exampleNum, input, desired);
-
-    for(i = 0; i < network->epochLen && i < exampleNum; i++)
-    {
-      backPropagation(input[i], desired[i], network);
-    }
-
-    /* i is 1 more than the final index at loop exit making up for indices being 1 less than the number of training cycles */
-    trainingCycles = i;
+    backPropagation(input[i], desired[i], network);
   }
-  else
-  {
-    for(i = 0; i < exampleNum; i++)
-    {
-      backPropagation(input[i], desired[i], network);
-    }
 
-    trainingCycles = i;
-  }
+  /* i is 1 more than the final index at loop exit making up for indices being 1 less than the number of training cycles */
+  trainingCycles = i;
 
   for(i = 0; i < network->layerNum - 1; i++)
   {

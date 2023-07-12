@@ -12,7 +12,6 @@
 #define LEARNING_RATE 0.01
 #define EPOCH_LEN 20
 #define TRAINING_ROUNDS 7500
-#define STOCHASTIC true
 #define DATA_SIZE 784
 #define LABEL_OFFSET (0.0)
 
@@ -34,7 +33,7 @@ imgSet_t parseCSV(const char* fileName)
 
   FILE *file = fopen(fileName, "r");
 
-  nullCatchAndDie(file, "fopen returned NULL in parseCSV when assigning FILE *file")
+  nullCatchAndDie(file, "fopen returned NULL in parseCSV when assigning FILE *file");
 
   img_t *imgs = malloc(sizeof(img_t));
 
@@ -194,14 +193,14 @@ int main(int argc, char **argv)
 
   for(i = 0; i < TRAINING_ROUNDS; i++)
   {
-    train(STOCHASTIC, trainingSet.imgNum, trainingInputs, trainingOutputs, network);
+    train(trainingSet.imgNum, trainingInputs, trainingOutputs, network);
     if(i % 100 == 0)
     {
       printf("%d\n", i);
     }
   }
 
-  printf("%d %s training rounds completed\n", TRAINING_ROUNDS, STOCHASTIC ? "stochastic" : "batch");
+  printf("%d training rounds completed\n", TRAINING_ROUNDS);
 
   for(i = 0; i < testingSet.imgNum; i++)
   {

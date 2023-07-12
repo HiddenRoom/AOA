@@ -34,7 +34,7 @@ void forwardPass(neuralNet_t *network); /* network should have the input/first l
 
 void backPropagation(double *input, double *desired, neuralNet_t *network); /* desired changes for network will be put in tmp weights and biases */
 
-void train(bool stochastic, uint32_t exampleNum, double **input, double **desired, neuralNet_t *network);
+void train(uint32_t exampleNum, double **input, double **desired, neuralNet_t *network);
 
 void exampleShuffle(uint32_t epochLen, uint32_t exampleNum, double **input, double **desired);
 
