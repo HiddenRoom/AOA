@@ -10,8 +10,8 @@
 
 #define LAYER_NUM 4
 #define LEARNING_RATE 0.018
-#define BATCH_SIZE 7
-#define TRAINING_ROUNDS 1500000
+#define BATCH_SIZE 4
+#define TRAINING_ROUNDS 15000
 #define DATA_SIZE 784
 #define LABEL_OFFSET (0.0)
 
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
     }
   }
 
-  neuralNet_t *network = neuralNetInit(LEARNING_RATE, EPOCH_LEN, LAYER_NUM, layerSizes);
+  neuralNet_t *network = neuralNetInit(LEARNING_RATE, BATCH_SIZE, LAYER_NUM, layerSizes);
 
   printf("neuralNetInit(%lf, %d, %d, {784, 8, 8, 10}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
 
