@@ -16,13 +16,13 @@ double dActivation(double activationOfX)
   return activationOfX <= 0 ? 0 : 1; 
 }
 
-neuralNet_t *neuralNetInit(double learningRate, uint32_t epochLen, uint32_t layerNum, uint32_t *layerSizes) /* generate randomly seeded neural net */
+neuralNet_t *neuralNetInit(double learningRate, uint32_t batchSize, uint32_t layerNum, uint32_t *layerSizes) /* generate randomly seeded neural net */
 {
   uint32_t i, j;
 
   neuralNet_t *result = malloc(sizeof(neuralNet_t));
   result->learningRate = learningRate;
-  result->epochLen = epochLen;
+  result->batchSize = batchSize;
   nullCatchAndDie(result, "malloc returned NULL in neuralNetInit when allocating neuralNet_t *result\n");
 
   result->layerNum = layerNum;
@@ -180,9 +180,9 @@ void train(uint32_t exampleNum, double **input, double **desired, neuralNet_t *n
 
   uint32_t trainingCycles;
 
-  exampleShuffle(network->epochLen, exampleNum, input, desired);
+  exampleShuffle(network->batchSize, exampleNum, input, desired);
 
-  for(i = 0; i < network->epochLen && i < exampleNum; i++)
+  for(i = 0; i < network->batchSize && i < exampleNum; i++)
   {
     backPropagation(input[i], desired[i], network);
   }
@@ -212,14 +212,14 @@ void train(uint32_t exampleNum, double **input, double **desired, neuralNet_t *n
   }
 }
 
-void exampleShuffle(uint32_t epochLen, uint32_t exampleNum, double **input, double **desired)
+void exampleShuffle(uint32_t batchSize, uint32_t exampleNum, double **input, double **desired)
 {
   double *tmpIn, *tmpDesi;
 
   uint32_t i;
   uint32_t randIndex;
 
-  for(i = 0; i < epochLen; i++)
+  for(i = 0; i < batchSize; i++)
   {
     randIndex = rand() % exampleNum;
 

@@ -8,10 +8,10 @@
 #include "include/neuralNetwork.h"
 #include "include/matrix.h"
 
-#define LAYER_NUM 5
-#define LEARNING_RATE 0.01
-#define EPOCH_LEN 20
-#define TRAINING_ROUNDS 7500
+#define LAYER_NUM 4
+#define LEARNING_RATE 0.018
+#define BATCH_SIZE 7
+#define TRAINING_ROUNDS 1500000
 #define DATA_SIZE 784
 #define LABEL_OFFSET (0.0)
 
@@ -120,10 +120,9 @@ int main(int argc, char **argv)
 
   uint32_t *layerSizes = malloc(sizeof(uint32_t) * LAYER_NUM);
   layerSizes[0] = 784;
-  layerSizes[1] = 30;
-  layerSizes[2] = 30;
-  layerSizes[3] = 30;
-  layerSizes[4] = 26;
+  layerSizes[1] = 300;
+  layerSizes[2] = 150;
+  layerSizes[3] = 10;
 
   imgSet_t trainingSet = parseCSV(argv[1]);
   imgSet_t testingSet = parseCSV(argv[2]);
@@ -199,6 +198,11 @@ int main(int argc, char **argv)
       printf("%d\n", i);
     }
   }
+  
+  uint8_t outCorrect, outPredicted;
+  double maxPrediction;
+
+  uint32_t numCorrect = 0;
 
   printf("%d training rounds completed\n", TRAINING_ROUNDS);
 
@@ -211,20 +215,49 @@ int main(int argc, char **argv)
 
     forwardPass(network);
 
+    outCorrect = 0;
+
     printf("expected ");
     for(j = 0; j < network->layerSizes[network->layerNum - 1]; j++)
     {
       printf("%lf ", testingOutputs[i][j]);
+
+      if(testingOutputs[i][j] > 0.01)
+      {
+        outCorrect = j;
+      }
     }
     printf("\n\n");
+    
+    outPredicted = 0;
+    maxPrediction = 0.0;
 
     printf("actual ");
     for(j = 0; j < network->layerSizes[network->layerNum - 1]; j++)
     {
       printf("%lf ", network->neurons[network->layerNum - 1][j]);
+
+      if(network->neurons[network->layerNum - 1][j] >= maxPrediction)
+      {
+        outPredicted = j;
+        maxPrediction = network->neurons[network->layerNum - 1][j];
+      }
     }
+
+    if(outPredicted == outCorrect)
+    {
+      numCorrect++;
+      printf("Correct on test example #%d\n", i);
+    }
+    else
+    {
+      printf("Incorrect on test example #%d\n", i);
+    }
+
     printf("\n------\n");
   }
+
+  printf("network accuracy: %lf\n", (double)((double)numCorrect / (double)(i + 1)));
 
   return 0;
 }
