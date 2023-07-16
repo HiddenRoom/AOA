@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 
   neuralNet_t *network = neuralNetInit(LEARNING_RATE, BATCH_SIZE, LAYER_NUM, layerSizes);
 
-  printf("neuralNetInit(%lf, %d, %d, {784, 8, 8, 10}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, EPOCH_LEN, LAYER_NUM);
+  printf("neuralNetInit(%lf, %d, %d, {784, 8, 8, 10}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, BATCH_SIZE, LAYER_NUM);
 
   printNetwork(network);
 
