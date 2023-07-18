@@ -8,11 +8,13 @@
 #include "include/neuralNetwork.h"
 #include "include/matrix.h"
 
+#define NET_NUM 1
 #define LAYER_NUM 4
-#define LEARNING_RATE 0.018
+#define LEARNING_RATE 0.025
 #define BATCH_SIZE 4
-#define TRAINING_ROUNDS 15000
+#define TRAINING_ROUNDS 20000
 #define DATA_SIZE 784
+#define OUTPUT_NUM 10
 #define LABEL_OFFSET (0.0)
 
 typedef struct IMAGE_STRUCT
@@ -70,42 +72,6 @@ imgSet_t parseCSV(const char* fileName)
   return result;
 }
 
-void printNetwork(neuralNet_t *network)
-{
-  uint32_t i, j, k;
-  
-  for(i = 0; i < network->layerNum - 1; i++)
-  {
-    printf("biases in layer %d:\n", i + 2);
-
-    for(j = 0; j < network->layerSizes[i + 1]; j++)
-    {
-      printf("%lf ", network->biases[i][j]);
-    }
-
-    printf("\n");
-  }
-
-  printf("\n");
-
-  for(i = 0; i < network->layerNum - 1; i++)
-  {
-    printf("weights from layer %d to %d\n", i + 1, i + 2);
-
-    for(j = 0; j < network->layerSizes[i]; j++)
-    {
-      for(k = 0; k < network->layerSizes[i + 1]; k++)
-      {
-        printf("%lf ", network->weights[i]->entries[j][k]);
-      }
-
-      printf("\n");
-    }
-  }
-
-  printf("\n");
-}
-
 int main(int argc, char **argv)
 {
   if(argc < 3)
@@ -116,13 +82,13 @@ int main(int argc, char **argv)
 
   srand(time(NULL));
 
-  uint32_t i, j;
+  uint32_t i, j, k;
 
   uint32_t *layerSizes = malloc(sizeof(uint32_t) * LAYER_NUM);
-  layerSizes[0] = 784;
-  layerSizes[1] = 300;
-  layerSizes[2] = 150;
-  layerSizes[3] = 10;
+  layerSizes[0] = DATA_SIZE;
+  layerSizes[1] = 200;
+  layerSizes[2] = 100;
+  layerSizes[LAYER_NUM - 1] = OUTPUT_NUM;
 
   imgSet_t trainingSet = parseCSV(argv[1]);
   imgSet_t testingSet = parseCSV(argv[2]);
@@ -182,43 +148,59 @@ int main(int argc, char **argv)
     }
   }
 
-  neuralNet_t *network = neuralNetInit(LEARNING_RATE, BATCH_SIZE, LAYER_NUM, layerSizes);
+  neuralNet_t *network[NET_NUM];
 
-  printf("neuralNetInit(%lf, %d, %d, {784, 8, 8, 10}) yielded a staring network with the following weights and biases\n", LEARNING_RATE, BATCH_SIZE, LAYER_NUM);
-
-  printNetwork(network);
-
-  printf("\n");
+  for(i = 0; i < NET_NUM; i++)
+  {
+    network[i] = neuralNetInit(LEARNING_RATE, BATCH_SIZE, LAYER_NUM, layerSizes);
+  }
 
   for(i = 0; i < TRAINING_ROUNDS; i++)
   {
-    train(trainingSet.imgNum, trainingInputs, trainingOutputs, network);
+    for(j = 0; j < NET_NUM; j++)
+    {
+      train(trainingSet.imgNum, trainingInputs, trainingOutputs, network[j]);
+    }
+
     if(i % 100 == 0)
     {
       printf("%d\n", i);
     }
   }
   
-  uint8_t outCorrect, outPredicted;
+  printf("%d training rounds completed\n", TRAINING_ROUNDS);
+
+  uint8_t outCorrect, outPredictedConsensus;
+  uint8_t outPredicted;
+  uint32_t predictions[OUTPUT_NUM];
+  uint32_t maxPredictionInt;
   double maxPrediction;
 
   uint32_t numCorrect = 0;
 
-  printf("%d training rounds completed\n", TRAINING_ROUNDS);
+  uint32_t groupSavings = 0;
 
   for(i = 0; i < testingSet.imgNum; i++)
   {
-    for(j = 0; j < network->layerSizes[0]; j++)
+    for(j = 0; j < OUTPUT_NUM; j++)
     {
-      network->neurons[0][j] = testingInputs[i][j];
+      predictions[j] = 0;
     }
 
-    forwardPass(network);
+    for(j = 0; j < NET_NUM; j++)
+    {
+      for(k = 0; k < DATA_SIZE; k++)
+      {
+        network[j]->neurons[0][k] = testingInputs[i][k];
+      }
+
+      forwardPass(network[j]);
+    }
 
     outCorrect = 0;
 
     printf("expected ");
-    for(j = 0; j < network->layerSizes[network->layerNum - 1]; j++)
+    for(j = 0; j < OUTPUT_NUM; j++)
     {
       printf("%lf ", testingOutputs[i][j]);
 
@@ -233,18 +215,46 @@ int main(int argc, char **argv)
     maxPrediction = 0.0;
 
     printf("actual ");
-    for(j = 0; j < network->layerSizes[network->layerNum - 1]; j++)
-    {
-      printf("%lf ", network->neurons[network->layerNum - 1][j]);
 
-      if(network->neurons[network->layerNum - 1][j] >= maxPrediction)
+
+    for(j = 0; j < NET_NUM; j++)
+    {
+      printf("    network %d    ", j);
+     
+      for(k = 0; k < OUTPUT_NUM; k++)
       {
-        outPredicted = j;
-        maxPrediction = network->neurons[network->layerNum - 1][j];
+        printf("%lf ", network[j]->neurons[LAYER_NUM - 1][k]);
+
+        if(network[j]->neurons[LAYER_NUM - 1][k] >= maxPrediction)
+        {
+          outPredicted = k;
+          maxPrediction = network[j]->neurons[LAYER_NUM - 1][k];
+        }
       }
+
+      predictions[outPredicted]++;
     }
 
-    if(outPredicted == outCorrect)
+    outPredictedConsensus = 0;
+    maxPredictionInt = 0;
+
+    for(j = 0; j < OUTPUT_NUM; j++)
+    {
+      printf("%d ", predictions[j]);
+      if(predictions[j] > maxPredictionInt)
+      {
+        outPredictedConsensus = j;
+        maxPredictionInt = predictions[j];
+      }
+    }
+    printf("\n");
+
+    if(maxPredictionInt != NET_NUM && outPredictedConsensus == outCorrect)
+    {
+      groupSavings++;
+    }
+
+    if(outPredictedConsensus == outCorrect)
     {
       numCorrect++;
       printf("Correct on test example #%d\n", i);
@@ -257,7 +267,7 @@ int main(int argc, char **argv)
     printf("\n------\n");
   }
 
-  printf("network accuracy: %lf\n", (double)((double)numCorrect / (double)(i + 1)));
+  printf("network accuracy: %lf\ngroupSavings: %d\n", (double)((double)numCorrect / (double)(i + 1)), groupSavings);
 
   return 0;
 }
