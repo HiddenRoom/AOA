@@ -135,13 +135,15 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
 
   for(i = 0; i < network->layerSizes[network->layerNum - 1]; i++)
   {
-    dError = 2.0 * (network->neurons[network->layerNum - 1][i] - desired[i]);
+    /* dC/dA */
+    dError = 2 * (network->neurons[network->layerNum - 1][i] - desired[i]);
+    /* dC/dA * dA/dZ */
     deltaLastLayer[i] = dError * dActivation(network->neurons[network->layerNum - 1][i]);
-
     network->biasesTmp[network->layerNum - 2][i] -= deltaLastLayer[i] * network->learningRate;
 
     for(j = 0; j < network->layerSizes[network->layerNum - 2]; j++)
     {
+      /* dC/dA * dA/dZ * dZ/dW */
       network->weightsTmp[network->layerNum - 2]->entries[j][i] -= network->neurons[network->layerNum - 2][j] * deltaLastLayer[i] * network->learningRate;
     }
   }
@@ -153,16 +155,19 @@ void backPropagation(double *input, double *desired, neuralNet_t *network) /* ch
     for(j = 0; j < network->layerSizes[i]; j++)
     {
       dError = 0.0;
+      /* dC/dA */
       for(k = 0; k < network->layerSizes[i + 1]; k++)
       {
         dError += network->weights[i]->entries[j][k] * deltaLastLayer[k];
       }
 
+      /* dC/dA * dA/dZ */
       deltaCurrentLayer[j] = dError * dActivation(network->neurons[i][j]);
       network->biasesTmp[i - 1][j] -= deltaCurrentLayer[j] * network->learningRate;
 
       for(k = 0; k < network->layerSizes[i - 1]; k++)
       {
+        /* dC/dA * dA/dZ * dZ/dW */
         network->weightsTmp[i - 1]->entries[k][j] -= network->neurons[i - 1][k] * deltaCurrentLayer[j] * network->learningRate;
       }
     }
